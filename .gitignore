@@ -1,0 +1,41 @@
+# Python và Django
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+*.egg
+
+# Môi trường ảo
+.venv/
+venv/
+env/
+*.env
+
+# Cơ sở dữ liệu
+db.sqlite3
+*.sqlite3
+
+# Tệp tạm và log
+*.log
+*.pot
+*.pid
+*.seed
+*.tmp
+
+# Thư mục media (nếu bạn lưu trữ file upload)
+media/
+
+# Tệp cấu hình IDE
+.idea/
+*.iml
+
+# Tệp hệ điều hành
+.DS_Store
+Thumbs.db
+
+# Tệp nhạy cảm
+*.secret
+*.key
+local_settings.py

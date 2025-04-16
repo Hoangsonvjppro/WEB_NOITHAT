@@ -1,0 +1,21 @@
+{% extends 'base_customer.html' %}
+
+{% block content %}
+    <h1 class="text-2xl mb-4">Danh sách sản phẩm</h1>
+    <div class="grid grid-cols-3 gap-4">
+        {% for product in products %}
+            <div class="border p-4 rounded shadow">
+                <h2 class="text-xl">{{ product.name }}</h2>
+                <p>{{ product.description }}</p>
+                <p class="text-green-600 font-bold">Giá: {{ product.price }} VNĐ</p>
+                <p>Tồn kho: {{ product.stock }}</p>
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-48 object-cover">
+                {% endif %}
+                <a href="{% url 'cart:add_to_cart' product.id %}" class="bg-blue-600 text-white p-2 rounded mt-2 inline-block">Thêm vào giỏ</a>
+            </div>
+        {% empty %}
+            <p>Chưa có sản phẩm nào.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

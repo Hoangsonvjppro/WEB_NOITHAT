@@ -1,0 +1,33 @@
+{% extends 'base_admin.html' %}
+
+{% block content %}
+    <h1 class="text-2xl mb-4">Báo cáo doanh thu</h1>
+    <form method="get" class="mb-4">
+        <label for="start_date">Từ ngày:</label>
+        <input type="date" name="start_date" id="start_date" value="{{ start_date }}" class="border p-2">
+        <label for="end_date" class="ml-4">Đến ngày:</label>
+        <input type="date" name="end_date" id="end_date" value="{{ end_date }}" class="border p-2">
+        <button type="submit" class="bg-blue-600 text-white p-2 rounded ml-2">Lọc</button>
+    </form>
+    <h2 class="text-xl">Tổng doanh thu: {{ total_revenue }} VNĐ</h2>
+    <table class="w-full border-collapse border">
+        <thead>
+            <tr>
+                <th class="border p-2">Mã đơn hàng</th>
+                <th class="border p-2">Khách hàng</th>
+                <th class="border p-2">Ngày đặt</th>
+                <th class="border p-2">Tổng tiền</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td class="border p-2">{{ order.id }}</td>
+                    <td class="border p-2">{{ order.customer }}</td>
+                    <td class="border p-2">{{ order.order_date }}</td>
+                    <td class="border p-2">{{ order.total_amount }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

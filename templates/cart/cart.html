@@ -1,0 +1,32 @@
+{% extends 'base_customer.html' %}
+
+{% block content %}
+    <h1 class="text-2xl mb-4">Giỏ hàng</h1>
+    {% if cart.cartitem_set.all %}
+        <table class="w-full border-collapse border">
+            <thead>
+                <tr>
+                    <th class="border p-2">Sản phẩm</th>
+                    <th class="border p-2">Số lượng</th>
+                    <th class="border p-2">Giá</th>
+                    <th class="border p-2">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart.cartitem_set.all %}
+                    <tr>
+                        <td class="border p-2">{{ item.product.name }}</td>
+                        <td class="border p-2">{{ item.quantity }}</td>
+                        <td class="border p-2">{{ item.product.price }}</td>
+                        <td class="border p-2">
+                            <a href="{% url 'cart:remove_from_cart' item.id %}" class="text-red-600">Xóa</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="{% url 'orders:checkout' %}" class="bg-green-600 text-white p-2 rounded mt-4 inline-block">Thanh toán</a>
+    {% else %}
+        <p>Giỏ hàng trống.</p>
+    {% endif %}
+{% endblock %}

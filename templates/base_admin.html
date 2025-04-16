@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-green-600 p-4 text-white">
+        <div class="container mx-auto flex justify-between">
+            <a href="{% url 'reports:sales_report' %}" class="text-2xl font-bold">Admin Dashboard</a>
+            <div>
+                <a href="{% url 'admin:index' %}" class="px-4">Quản lý</a>
+                <a href="{% url 'accounts:logout' %}" class="px-4">Đăng xuất</a>
+            </div>
+        </div>
+    </nav>
+    <div class="container mx-auto mt-6">
+        {% block content %}
+        {% endblock %}
+    </div>
+</body>
+</html>

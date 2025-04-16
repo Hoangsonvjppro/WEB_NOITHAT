@@ -1,0 +1,29 @@
+{% extends 'base_customer.html' %}
+
+{% block content %}
+    <h1 class="text-2xl mb-4">Lịch sử đơn hàng</h1>
+    {% if orders %}
+        <table class="w-full border-collapse border">
+            <thead>
+                <tr>
+                    <th class="border p-2">Mã đơn hàng</th>
+                    <th class="border p-2">Ngày đặt</th>
+                    <th class="border p-2">Tổng tiền</th>
+                    <th class="border p-2">Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                    <tr>
+                        <td class="border p-2">{{ order.id }}</td>
+                        <td class="border p-2">{{ order.order_date }}</td>
+                        <td class="border p-2">{{ order.total_amount }}</td>
+                        <td class="border p-2">{{ order.status }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Chưa có đơn hàng nào.</p>
+    {% endif %}
+{% endblock %}

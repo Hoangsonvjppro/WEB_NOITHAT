@@ -1,0 +1,32 @@
+{% extends 'base_customer.html' %}
+
+{% block content %}
+    <h1 class="text-2xl mb-4">Thanh toán</h1>
+    <table class="w-full border-collapse border">
+        <thead>
+            <tr>
+                <th class="border p-2">Sản phẩm</th>
+                <th class="border p-2">Số lượng</th>
+                <th class="border p-2">Giá</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart.cartitem_set.all %}
+                <tr>
+                    <td class="border p-2">{{ item.product.name }}</td>
+                    <td class="border p-2">{{ item.quantity }}</td>
+                    <td class="border p-2">{{ item.product.price }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        <label for="payment_method">Phương thức thanh toán:</label>
+        <select name="payment_method" id="payment_method" class="border p-2">
+            <option value="Cash">Tiền mặt</option>
+            <option value="Card">Thẻ tín dụng</option>
+        </select>
+        <button type="submit" class="bg-green-600 text-white p-2 rounded ml-2">Xác nhận</button>
+    </form>
+{% endblock %}
