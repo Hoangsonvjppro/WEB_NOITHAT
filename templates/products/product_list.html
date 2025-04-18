@@ -1,21 +1,106 @@
 {% extends 'base_customer.html' %}
+{% load static i18n %}
 
 {% block content %}
-    <h1 class="text-2xl mb-4">Danh sách sản phẩm</h1>
-    <div class="grid grid-cols-3 gap-4">
-        {% for product in products %}
-            <div class="border p-4 rounded shadow">
-                <h2 class="text-xl">{{ product.name }}</h2>
-                <p>{{ product.description }}</p>
-                <p class="text-green-600 font-bold">Giá: {{ product.price }} VNĐ</p>
-                <p>Tồn kho: {{ product.stock }}</p>
-                {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-48 object-cover">
-                {% endif %}
-                <a href="{% url 'cart:add_to_cart' product.id %}" class="bg-blue-600 text-white p-2 rounded mt-2 inline-block">Thêm vào giỏ</a>
+<div class="container mx-auto flex">
+    <!-- Sidebar: Danh mục sản phẩm -->
+    <aside class="w-1/4 p-4 bg-gray-100 rounded-lg mr-6">
+        <h2 class="text-xl font-bold mb-4 text-gray-800">{% trans "Danh mục sản phẩm" %}</h2>
+        <ul class="space-y-2">
+            <li>
+                <a href="{% url 'products:product_list' %}" class="text-blue-600 hover:underline {% if not selected_category %}font-bold{% endif %}">
+                    {% trans "Tất cả" %}
+                </a>
+            </li>
+            {% for category in categories %}
+                <li>
+                    <a href="{% url 'products:product_list' %}?category={{ category.id }}"
+                       class="text-blue-600 hover:underline {% if selected_category == category.id %}font-bold{% endif %}">
+                        {{ category.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </aside>
+
+    <!-- Nội dung chính: Danh sách sản phẩm -->
+    <main class="w-3/4">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">{% trans "Sản phẩm" %}</h1>
+
+        <!-- Tìm kiếm và sắp xếp -->
+        <div class="flex justify-between mb-6">
+            <!-- Tìm kiếm -->
+            <form method="get" class="flex">
+                <input type="text" name="q" value="{{ search_query }}" placeholder="{% trans 'Tìm kiếm sản phẩm...' %}"
+                       class="border border-gray-300 rounded-md p-2 w-64">
+                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 ml-2">
+                    {% trans "Tìm kiếm" %}
+                </button>
+            </form>
+            <!-- Sắp xếp -->
+            <div>
+                <label for="sort" class="text-gray-700 mr-2">{% trans "Sắp xếp:" %}</label>
+                <select id="sort" onchange="window.location.href=this.value" class="border border-gray-300 rounded-md p-2">
+                    <option value="{% url 'products:product_list' %}?sort=name{% if selected_category %}&category={{ selected_category }}{% endif %}"
+                            {% if sort_by == 'name' %}selected{% endif %}>
+                        {% trans "Tên (A-Z)" %}
+                    </option>
+                    <option value="{% url 'products:product_list' %}?sort=price_asc{% if selected_category %}&category={{ selected_category }}{% endif %}"
+                            {% if sort_by == 'price_asc' %}selected{% endif %}>
+                        {% trans "Giá (Thấp - Cao)" %}
+                    </option>
+                    <option value="{% url 'products:product_list' %}?sort=price_desc{% if selected_category %}&category={{ selected_category }}{% endif %}"
+                            {% if sort_by == 'price_desc' %}selected{% endif %}>
+                        {% trans "Giá (Cao - Thấp)" %}
+                    </option>
+                </select>
             </div>
-        {% empty %}
-            <p>Chưa có sản phẩm nào.</p>
-        {% endfor %}
-    </div>
+        </div>
+
+        <!-- Danh sách sản phẩm -->
+        {% if products %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {% for product in products %}
+                    <div class="bg-white rounded-lg shadow-md p-4">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-48 object-cover rounded-md mb-4">
+                        {% else %}
+                            <div class="w-full h-48 bg-gray-200 rounded-md mb-4 flex items-center justify-center">
+                                <span class="text-gray-500">{% trans "Không có hình ảnh" %}</span>
+                            </div>
+                        {% endif %}
+                        <h3 class="text-lg font-semibold text-gray-800">{{ product.name }}</h3>
+                        <p class="text-gray-600 mb-2">{{ product.price }} VNĐ</p>
+                        <a href="{% url 'cart:add_to_cart' product.id %}" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                            {% trans "Thêm vào giỏ hàng" %}
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Phân trang -->
+            <div class="mt-6 flex justify-center">
+                <nav class="inline-flex rounded-md shadow">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
+                           class="px-3 py-2 bg-white border border-gray-300 text-blue-600 hover:bg-gray-100 rounded-l-md">
+                            {% trans "Trước" %}
+                        </a>
+                    {% endif %}
+                    <span class="px-3 py-2 bg-white border border-gray-300 text-gray-700">
+                        {% trans "Trang" %} {{ page_obj.number }} {% trans "của" %} {{ page_obj.paginator.num_pages }}
+                    </span>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
+                           class="px-3 py-2 bg-white border border-gray-300 text-blue-600 hover:bg-gray-100 rounded-r-md">
+                            {% trans "Tiếp" %}
+                        </a>
+                    {% endif %}
+                </nav>
+            </div>
+        {% else %}
+            <p class="text-gray-600">{% trans "Chưa có sản phẩm nào." %}</p>
+        {% endif %}
+    </main>
+</div>
 {% endblock %}

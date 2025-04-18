@@ -1,41 +1,12 @@
-from django.shortcuts import render, redirect
-from .models import Order, OrderItem
-from apps.cart.models import Cart, CartItem
-from apps.accounts.models import Customer
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Order
 
-def checkout(request):
-    if not request.user.is_authenticated:
-        return redirect('accounts:login')
-    try:
-        customer = request.user.customer
-    except Customer.DoesNotExist:
-        customer = Customer.objects.create(user=request.user, membership_type='regular')
-    cart = Cart.objects.get(customer=customer)
-    if request.method == 'POST':
-        total_amount = sum(item.product.price * item.quantity for item in cart.cartitem_set.all())
-        order = Order.objects.create(
-            customer=customer,
-            total_amount=total_amount,
-            payment_method=request.POST.get('payment_method', 'Cash'),
-        )
-        for item in cart.cartitem_set.all():
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity,
-            )
-            item.product.stock -= item.quantity
-            item.product.save()
-        cart.cartitem_set.all().delete()
-        return redirect('orders:order_history')
-    return render(request, 'orders/checkout.html', {'cart': cart})
-
+@login_required
 def order_history(request):
-    if not request.user.is_authenticated:
-        return redirect('accounts:login')
-    try:
-        customer = request.user.customer
-    except Customer.DoesNotExist:
-        customer = Customer.objects.create(user=request.user, membership_type='regular')
-    orders = Order.objects.filter(customer=customer).order_by('-order_date')
+    orders = Order.objects.filter(user=request.user).order_by('-order_date')
+    # Tính tổng giá cho từng OrderItem
+    for order in orders:
+        for item in order.orderitem_set.all():
+            item.total = item.quantity * item.price  # Thêm thuộc tính total
     return render(request, 'orders/order_history.html', {'orders': orders})

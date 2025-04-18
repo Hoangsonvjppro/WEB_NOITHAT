@@ -1,29 +1,49 @@
 {% extends 'base_customer.html' %}
+{% load static i18n %}
 
 {% block content %}
-    <h1 class="text-2xl mb-4">Lịch sử đơn hàng</h1>
+<div class="container mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">{% trans "Lịch sử đơn hàng" %}</h1>
+
     {% if orders %}
-        <table class="w-full border-collapse border">
-            <thead>
-                <tr>
-                    <th class="border p-2">Mã đơn hàng</th>
-                    <th class="border p-2">Ngày đặt</th>
-                    <th class="border p-2">Tổng tiền</th>
-                    <th class="border p-2">Trạng thái</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
-                    <tr>
-                        <td class="border p-2">{{ order.id }}</td>
-                        <td class="border p-2">{{ order.order_date }}</td>
-                        <td class="border p-2">{{ order.total_amount }}</td>
-                        <td class="border p-2">{{ order.status }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="space-y-6">
+            {% for order in orders %}
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <p class="text-lg font-semibold">{% trans "Mã đơn hàng:" %} {{ order.id }}</p>
+                            <p class="text-gray-600">{% trans "Ngày đặt:" %} {{ order.order_date }}</p>
+                        </div>
+                        <div>
+                            <p class="text-lg font-semibold">{% trans "Tổng tiền:" %} {{ order.total_price }} VNĐ</p>
+                            <p class="text-gray-600">{% trans "Trạng thái:" %} {{ order.status }}</p>
+                        </div>
+                    </div>
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="border-b">
+                                <th class="py-2">{% trans "Sản phẩm" %}</th>
+                                <th class="py-2">{% trans "Số lượng" %}</th>
+                                <th class="py-2">{% trans "Giá" %}</th>
+                                <th class="py-2">{% trans "Tổng" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.orderitem_set.all %}
+                                <tr class="border-b">
+                                    <td class="py-2">{{ item.product.name }}</td>
+                                    <td class="py-2">{{ item.quantity }}</td>
+                                    <td class="py-2">{{ item.price }} VNĐ</td>
+                                    <td class="py-2">{{ item.total }} VNĐ</td> <!-- Sử dụng total đã tính -->
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endfor %}
+        </div>
     {% else %}
-        <p>Chưa có đơn hàng nào.</p>
+        <p class="text-gray-600">{% trans "Bạn chưa có đơn hàng nào." %}</p>
     {% endif %}
+</div>
 {% endblock %}

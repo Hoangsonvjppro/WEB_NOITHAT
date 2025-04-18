@@ -38,7 +38,7 @@ FurnitureStore/
 ### Bước 1: Clone project
 
 ```bash
-https://github.com/Hoangsonvjppro/WEB_NOITHAT.git
+git clone https://github.com/Hoangsonvjppro/WEB_NOITHAT.git
 cd FurnitureStore
 ```
 

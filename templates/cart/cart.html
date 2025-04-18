@@ -1,32 +1,73 @@
 {% extends 'base_customer.html' %}
+{% load static i18n %}
 
 {% block content %}
-    <h1 class="text-2xl mb-4">Giỏ hàng</h1>
-    {% if cart.cartitem_set.all %}
-        <table class="w-full border-collapse border">
-            <thead>
-                <tr>
-                    <th class="border p-2">Sản phẩm</th>
-                    <th class="border p-2">Số lượng</th>
-                    <th class="border p-2">Giá</th>
-                    <th class="border p-2">Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in cart.cartitem_set.all %}
-                    <tr>
-                        <td class="border p-2">{{ item.product.name }}</td>
-                        <td class="border p-2">{{ item.quantity }}</td>
-                        <td class="border p-2">{{ item.product.price }}</td>
-                        <td class="border p-2">
-                            <a href="{% url 'cart:remove_from_cart' item.id %}" class="text-red-600">Xóa</a>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <a href="{% url 'orders:checkout' %}" class="bg-green-600 text-white p-2 rounded mt-4 inline-block">Thanh toán</a>
-    {% else %}
-        <p>Giỏ hàng trống.</p>
+<div class="container mx-auto">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">{% trans "Giỏ hàng" %}</h1>
+
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %} rounded-md">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
+
+    {% if cart_items %}
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-b">
+                        <th class="py-2">{% trans "Sản phẩm" %}</th>
+                        <th class="py-2">{% trans "Giá" %}</th>
+                        <th class="py-2">{% trans "Số lượng" %}</th>
+                        <th class="py-2">{% trans "Tổng" %}</th>
+                        <th class="py-2">{% trans "Hành động" %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                        <tr class="border-b">
+                            <td class="py-2">{{ item.product.name }}</td>
+                            <td class="py-2">{{ item.product.price }} VNĐ</td>
+                            <td class="py-2">
+                                <form method="post" class="inline-flex">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="update">
+                                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="0"
+                                           class="w-16 border border-gray-300 rounded-md p-1">
+                                    <button type="submit" class="ml-2 text-blue-600 hover:underline">
+                                        {% trans "Cập nhật" %}
+                                    </button>
+                                </form>
+                            </td>
+                            <td class="py-2">{{ item.total }} VNĐ</td> <!-- Sử dụng total đã tính -->
+                            <td class="py-2">
+                                <form method="post" class="inline-flex">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="remove">
+                                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                                    <button type="submit" class="text-red-600 hover:underline">
+                                        {% trans "Xóa" %}
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div class="mt-4 flex justify-between items-center">
+                <p class="text-xl font-bold">{% trans "Tổng cộng:" %} {{ total_price }} VNĐ</p>
+                <a href="{% url 'cart:checkout' %}" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                    {% trans "Thanh toán" %}
+                </a>
+            </div>
+        </div>
+    {% else %}
+        <p class="text-gray-600">{% trans "Giỏ hàng trống." %}</p>
+    {% endif %}
+</div>
 {% endblock %}

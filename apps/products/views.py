@@ -1,10 +1,38 @@
-from django.shortcuts import render, get_object_or_404
-from .models import Product
+from django.shortcuts import render
+from django.core.paginator import Paginator
+from .models import Product, Category
 
 def product_list(request):
-    products = Product.objects.all()
-    return render(request, 'products/product_list.html', {'products': products})
+    categories = Category.objects.all()
+    selected_category = request.GET.get('category')
+    search_query = request.GET.get('q', '')
+    sort_by = request.GET.get('sort', 'name')  # Mặc định sắp xếp theo tên
 
-def product_detail(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    return render(request, 'products/product_detail.html', {'product': product})
+    # Lọc sản phẩm
+    products = Product.objects.all()
+    if selected_category:
+        products = products.filter(category_id=selected_category)
+    if search_query:
+        products = products.filter(name__icontains=search_query)
+
+    # Sắp xếp
+    if sort_by == 'price_asc':
+        products = products.order_by('price')
+    elif sort_by == 'price_desc':
+        products = products.order_by('-price')
+    else:
+        products = products.order_by('name')
+
+    # Phân trang
+    paginator = Paginator(products, 6)  # 6 sản phẩm mỗi trang
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'products/product_list.html', {
+        'products': page_obj,
+        'categories': categories,
+        'selected_category': selected_category,
+        'search_query': search_query,
+        'sort_by': sort_by,
+        'page_obj': page_obj,
+    })
