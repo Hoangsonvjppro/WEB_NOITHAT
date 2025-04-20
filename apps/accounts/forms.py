@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = User
-        fields = ('username', 'password1', 'password2')
+        fields = ('username', 'email', 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -21,3 +21,9 @@ class CustomUserCreationForm(UserCreationForm):
         if len(password1) < 6:
             raise ValidationError("Mật khẩu phải có ít nhất 6 ký tự.")
         return password1
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("Email đã được đăng ký.")
+        return email

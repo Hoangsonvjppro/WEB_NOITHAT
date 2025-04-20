@@ -2,8 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Cart, CartItem
 from apps.products.models import Product
+from django.contrib.auth.decorators import login_required
 
-
+@login_required
 def cart(request):
     if not request.user.is_authenticated:
         messages.error(request, "Vui lòng đăng nhập để xem giỏ hàng.")
@@ -40,7 +41,7 @@ def cart(request):
     total_price = sum(item.total for item in cart_items)
     return render(request, 'cart/cart.html', {'cart_items': cart_items, 'total_price': total_price})
 
-
+@login_required
 def add_to_cart(request, product_id):
     if not request.user.is_authenticated:
         messages.error(request, "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.")
@@ -55,7 +56,7 @@ def add_to_cart(request, product_id):
     messages.success(request, "Đã thêm sản phẩm vào giỏ hàng.")
     return redirect('products:product_list')
 
-
+@login_required
 def checkout(request):
     if not request.user.is_authenticated:
         messages.error(request, "Vui lòng đăng nhập để thanh toán.")
@@ -67,12 +68,19 @@ def checkout(request):
         messages.error(request, "Giỏ hàng trống. Vui lòng thêm sản phẩm trước khi thanh toán.")
         return redirect('products:product_list')
 
+    # Trước khi tạo đơn hàng
+    for item in cart_items:
+        if item.quantity > item.product.stock:
+            messages.error(request, f"Sản phẩm {item.product.name} không đủ số lượng trong kho.")
+            return redirect('cart:cart')
+
     # Tạo đơn hàng
     from apps.orders.models import Order, OrderItem
     order = Order.objects.create(user=request.user,
                                  total_price=sum(item.product.price * item.quantity for item in cart_items))
     for item in cart_items:
         OrderItem.objects.create(order=order, product=item.product, quantity=item.quantity, price=item.product.price)
+        total_price = sum(item.total_price for item in cart_items)
 
     # Xóa giỏ hàng sau khi thanh toán
     cart_items.delete()

@@ -1,0 +1,10 @@
+{% extends 'base_customer.html' %}
+{% block content %}
+<h1>Thông tin cá nhân</h1>
+<form method="post">
+    {% csrf_token %}
+    <label>Username: <input type="text" name="username" value="{{ user.username }}"></label>
+    <label>Email: <input type="email" name="email" value="{{ user.email }}"></label>
+    <button type="submit">Cập nhật</button>
+</form>
+{% endblock %}

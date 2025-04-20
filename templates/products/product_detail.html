@@ -1,18 +1,27 @@
 {% extends 'base_customer.html' %}
+{% load static i18n %}
 
 {% block content %}
-    <h1 class="text-2xl mb-4">{{ product.name }}</h1>
-    <div class="flex">
-        <div class="w-1/3">
+<div class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold mb-4">{{ product.name }}</h1>
+    <div class="flex flex-col md:flex-row gap-6">
+        <div class="md:w-1/2">
             {% if product.image %}
-                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-64 object-cover">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-64 object-cover rounded-md mb-4">
+            {% else %}
+                <div class="w-full h-64 bg-gray-200 flex items-center justify-center mb-4 rounded-md">
+                    <span class="text-gray-500">{% trans "Không có hình ảnh" %}</span>
+                </div>
             {% endif %}
         </div>
-        <div class="w-2/3 pl-4">
-            <p>{{ product.description }}</p>
-            <p class="text-green-600 font-bold">Giá: {{ product.price }} VNĐ</p>
-            <p>Tồn kho: {{ product.stock }}</p>
-            <a href="{% url 'cart:add_to_cart' product.id %}" class="bg-blue-600 text-white p-2 rounded">Thêm vào giỏ</a>
+        <div class="md:w-1/2">
+            <p class="text-lg mb-2"><strong>{% trans "Mô tả:" %}</strong> {{ product.description }}</p>
+            <p class="text-lg mb-2"><strong>{% trans "Giá:" %}</strong> {{ product.price }} VNĐ</p>
+            <p class="text-lg mb-4"><strong>{% trans "Số lượng tồn:" %}</strong> {{ product.stock_quantity }}</p>
+            <a href="{% url 'cart:add_to_cart' product.id %}" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                {% trans "Thêm vào giỏ hàng" %}
+            </a>
         </div>
     </div>
+</div>
 {% endblock %}

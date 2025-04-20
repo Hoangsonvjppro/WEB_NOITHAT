@@ -4,6 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from .forms import CustomUserCreationForm
 from .models import Customer
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 
 def register_view(request):
     if request.method == 'POST':
@@ -35,3 +36,13 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('products:product_list')
+
+@login_required
+def profile_view(request):
+    if request.method == 'POST':
+        user = request.user
+        user.username = request.POST['username']
+        user.email = request.POST['email']
+        user.save()
+        return redirect('profile')
+    return render(request, 'accounts/profile.html', {'user': request.user})
