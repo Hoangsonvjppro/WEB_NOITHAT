@@ -1,6 +1,11 @@
 {% extends 'base_customer.html' %}
 {% block content %}
 <h1>Thông tin cá nhân</h1>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert {{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+{% endif %}
 <form method="post">
     {% csrf_token %}
     <label>Username: <input type="text" name="username" value="{{ user.username }}"></label>
