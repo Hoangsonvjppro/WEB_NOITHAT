@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from apps.products.models import Product
+from apps.accounts.models import Customer
 
 class Order(models.Model):
     STATUS_CHOICES = [

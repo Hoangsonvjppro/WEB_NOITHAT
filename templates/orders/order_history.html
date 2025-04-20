@@ -2,48 +2,83 @@
 {% load static i18n %}
 
 {% block content %}
-<div class="container mx-auto">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">{% trans "Lịch sử đơn hàng" %}</h1>
-
-    {% if orders %}
-        <div class="space-y-6">
+<div class="win95-window">
+    <div class="win95-titlebar">{% trans "Lịch sử đơn hàng" %}</div>
+    <div class="win95-content">
+        {% if orders %}
             {% for order in orders %}
-                <div class="bg-white rounded-lg shadow-md p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <p class="text-lg font-semibold">{% trans "Mã đơn hàng:" %} {{ order.id }}</p>
-                            <p class="text-gray-600">{% trans "Ngày đặt:" %} {{ order.order_date }}</p>
-                        </div>
-                        <div>
-                            <p class="text-lg font-semibold">{% trans "Tổng tiền:" %} {{ order.total_price }} VNĐ</p>
-                            <p class="text-gray-600">{% trans "Trạng thái:" %} {{ order.status }}</p>
-                        </div>
+                <div class="win95-order">
+                    <div class="win95-order-header">
+                        <span>#{{ order.id }}</span>
+                        <span>{{ order.order_date|date:"d/m/Y H:i" }}</span>
+                        <span class="win95-status">{{ order.status }}</span>
+                        <span class="win95-total">{{ order.total_price }} VNĐ</span>
                     </div>
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="border-b">
-                                <th class="py-2">{% trans "Sản phẩm" %}</th>
-                                <th class="py-2">{% trans "Số lượng" %}</th>
-                                <th class="py-2">{% trans "Giá" %}</th>
-                                <th class="py-2">{% trans "Tổng" %}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in order.orderitem_set.all %}
-                                <tr class="border-b">
-                                    <td class="py-2">{{ item.product.name }}</td>
-                                    <td class="py-2">{{ item.quantity }}</td>
-                                    <td class="py-2">{{ item.price }} VNĐ</td>
-                                    <td class="py-2">{{ item.total }} VNĐ</td> <!-- Sử dụng total đã tính -->
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="win95-order-items">
+                        {% for item in order.orderitem_set.all %}
+                            <div class="win95-order-item">
+                                {% if item.product.image %}
+                                    <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                                {% else %}
+                                    <div class="win95-no-image-small">
+                                        <span>{% trans "Không có ảnh" %}</span>
+                                    </div>
+                                {% endif %}
+                                <div class="win95-order-info">
+                                    <h4>{{ item.product.name }}</h4>
+                                    <p>{{ item.quantity }} x {{ item.price }} VNĐ</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
             {% endfor %}
-        </div>
-    {% else %}
-        <p class="text-gray-600">{% trans "Bạn chưa có đơn hàng nào." %}</p>
-    {% endif %}
+        {% else %}
+            <div class="win95-empty">
+                <p>{% trans "Chưa có đơn hàng nào" %}</p>
+            </div>
+        {% endif %}
+    </div>
 </div>
+
+<style>
+    .win95-order {
+        border: 2px solid #000;
+        margin-bottom: 20px;
+        background: #fff;
+    }
+    .win95-order-header {
+        padding: 10px;
+        background: #000080;
+        color: #fff;
+        display: flex;
+        justify-content: space-between;
+    }
+    .win95-status {
+        padding: 4px;
+        background: #c0c0c0;
+        color: #000;
+    }
+    .win95-order-items {
+        padding: 10px;
+    }
+    .win95-order-item {
+        display: flex;
+        gap: 10px;
+        margin: 10px 0;
+        padding: 10px;
+        border: 2px solid #000;
+    }
+    .win95-order-item img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+    }
+    .win95-empty {
+        padding: 20px;
+        text-align: center;
+        border: 2px solid #000;
+        background: #fff;
+    }
+</style>
 {% endblock %}

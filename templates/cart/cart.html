@@ -2,72 +2,231 @@
 {% load static i18n %}
 
 {% block content %}
-<div class="container mx-auto p-4">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">{% trans "Giỏ hàng" %}</h1>
+<div class="win95-window">
+    <div class="win95-titlebar">{% trans "Giỏ hàng" %}</div>
+    <div class="win95-content">
+        {% if messages %}
+            <div class="win95-messages">
+                {% for message in messages %}
+                    <div class="win95-alert {% if message.tags == 'success' %}win95-success{% else %}win95-error{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
 
-    {% if messages %}
-        <div class="mb-4">
-            {% for message in messages %}
-                <div class="p-4 {% if message.tags == 'success' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %} rounded-md">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
-    {% if cart_items %}
-        <div class="bg-white rounded-lg shadow-md p-6">
-            <table class="w-full text-left">
-                <thead>
-                    <tr class="border-b">
-                        <th class="py-2">{% trans "Sản phẩm" %}</th>
-                        <th class="py-2">{% trans "Giá" %}</th>
-                        <th class="py-2">{% trans "Số lượng" %}</th>
-                        <th class="py-2">{% trans "Tổng" %}</th>
-                        <th class="py-2">{% trans "Hành động" %}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in cart_items %}
-                        <tr class="border-b">
-                            <td class="py-2">{{ item.product.name }}</td>
-                            <td class="py-2">{{ item.product.price }} VNĐ</td>
-                            <td class="py-2">
-                                <form method="post" class="inline-flex">
+        {% if cart_items %}
+            <div class="win95-cart-container">
+                <!-- Danh sách sản phẩm -->
+                {% for item in cart_items %}
+                    <div class="win95-cart-item">
+                        <div class="win95-cart-image">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                            {% else %}
+                                <div class="win95-no-image">
+                                    <span>{% trans "Không có hình ảnh" %}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="win95-cart-details">
+                            <h4>{{ item.product.name }}</h4>
+                            <p>{% trans "Đơn giá:" %} <strong>{{ item.product.price }} VNĐ</strong></p>
+                            <p>{% trans "Tổng:" %} <strong>{{ item.total }} VNĐ</strong></p>
+                            <div class="win95-controls">
+                                <form method="post" class="win95-form">
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="update">
                                     <input type="hidden" name="item_id" value="{{ item.id }}">
-                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="0"
-                                           class="w-16 border border-gray-300 rounded-md p-1">
-                                    <button type="submit" class="ml-2 text-blue-600 hover:underline">
-                                        {% trans "Cập nhật" %}
-                                    </button>
+                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="0" class="win95-input">
+                                    <button type="submit" class="win95-button">{% trans "Cập nhật" %}</button>
                                 </form>
-                            </td>
-                            <td class="py-2">{{ item.total }} VNĐ</td>
-                            <td class="py-2">
-                                <form method="post" class="inline-flex">
+                                <form method="post" class="win95-form">
                                     {% csrf_token %}
                                     <input type="hidden" name="action" value="remove">
                                     <input type="hidden" name="item_id" value="{{ item.id }}">
-                                    <button type="submit" class="text-red-600 hover:underline">
-                                        {% trans "Xóa" %}
+                                    <button type="submit" class="win95-button win95-button-danger">
+                                        <i class="bi bi-trash"></i> {% trans "Xóa" %}
                                     </button>
                                 </form>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <div class="mt-4 flex justify-between items-center">
-                <p class="text-xl font-bold">{% trans "Tổng cộng:" %} {{ total_price }} VNĐ</p>
-                <a href="{% url 'cart:checkout' %}" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-                    {% trans "Thanh toán" %}
-                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <!-- Tổng thanh toán -->
+                <div class="win95-total">
+                    <span>{% trans "Tổng cộng:" %}</span>
+                    <strong>{{ total_price }} VNĐ</strong>
+                    <a href="{% url 'cart:checkout' %}" class="win95-button">{% trans "Thanh toán" %}</a>
+                </div>
             </div>
-        </div>
-    {% else %}
-        <p class="text-gray-600">{% trans "Giỏ hàng trống." %}</p>
-    {% endif %}
+        {% else %}
+            <div class="win95-empty">
+                <p><i class="bi bi-cart-x"></i> {% trans "Giỏ hàng của bạn đang trống" %}</p>
+            </div>
+        {% endif %}
+    </div>
 </div>
+
+<style>
+    .win95-messages {
+        margin-bottom: 12px;
+    }
+    .win95-alert {
+        padding: 8px;
+        border: 2px solid #000;
+        border-top-color: #fff;
+        border-left-color: #fff;
+        border-right-color: #808080;
+        border-bottom-color: #808080;
+        background: #fff;
+        font-size: 12px;
+    }
+    .win95-success {
+        background: #c0c0c0;
+        color: #005a00;
+    }
+    .win95-error {
+        background: #c0c0c0;
+        color: #a80000;
+    }
+    .win95-cart-container {
+        background: #fff;
+        border: 2px solid #000;
+        border-top-color: #fff;
+        border-left-color: #fff;
+        border-right-color: #808080;
+        border-bottom-color: #808080;
+        padding: 10px;
+    }
+    .win95-cart-item {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+        padding: 10px;
+        border: 2px solid #000;
+        border-top-color: #fff;
+        border-left-color: #fff;
+        border-right-color: #808080;
+        border-bottom-color: #808080;
+        background: #fff;
+    }
+    .win95-cart-image img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border: 2px solid #000;
+        border-top-color: #fff;
+        border-left-color: #fff;
+        border-right-color: #808080;
+        border-bottom-color: #808080;
+    }
+    .win95-no-image {
+        width: 150px;
+        height: 150px;
+        background: #c0c0c0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #000;
+        border-top-color: #fff;
+        border-left-color: #fff;
+        border-right-color: #808080;
+        border-bottom-color: #808080;
+        text-align: center;
+        font-size: 12px;
+    }
+    .win95-cart-details {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .win95-cart-details h4 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        color: #000080;
+    }
+    .win95-cart-details p {
+        margin: 0 0 8px 0;
+        font-size: 12px;
+    }
+    .win95-controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .win95-form {
+        display: flex;
+        gap: 8px;
+    }
+    .win95-input {
+        width: 80px;
+        padding: 4px;
+        font-family: 'MS Sans Serif', Arial, sans-serif;
+        font-size: 12px;
+        background: #fff;
+        border: 2px solid #000;
+        border-top-color: #fff;
+        border-left-color: #fff;
+        border-right-color: #808080;
+        border-bottom-color: #808080;
+    }
+    .win95-button {
+        padding: 4px 8px;
+        background: #c0c0c0;
+        border: 2px solid #000;
+        border-top-color: #fff;
+        border-left-color: #fff;
+        border-right-color: #808080;
+        border-bottom-color: #808080;
+        font-family: 'MS Sans Serif', Arial, sans-serif;
+        font-size: 12px;
+        text-decoration: none;
+        color: #000;
+        cursor: pointer;
+    }
+    .win95-button:active {
+        border-top-color: #808080;
+        border-left-color: #808080;
+        border-right-color: #fff;
+        border-bottom-color: #fff;
+    }
+    .win95-button-danger {
+        background: #c0c0c0;
+        color: #a80000;
+    }
+    .win95-total {
+        margin-top: 20px;
+        padding-top: 10px;
+        border-top: 2px solid #000;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #fff;
+    }
+    .win95-total span {
+        font-size: 14px;
+    }
+    .win95-total strong {
+        font-size: 14px;
+        color: #000080;
+    }
+    .win95-empty {
+        padding: 20px;
+        text-align: center;
+        border: 2px solid #000;
+        border-top-color: #fff;
+        border-left-color: #fff;
+        border-right-color: #808080;
+        border-bottom-color: #808080;
+        background: #fff;
+        font-size: 14px;
+    }
+    .win95-empty i {
+        font-size: 24px;
+        margin-right: 8px;
+    }
+</style>
 {% endblock %}

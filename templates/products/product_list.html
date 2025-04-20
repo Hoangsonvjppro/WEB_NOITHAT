@@ -2,110 +2,167 @@
 {% load static i18n %}
 
 {% block content %}
-<div class="flex flex-col md:flex-row">
-    <!-- Sidebar danh mục sản phẩm -->
-    <aside class="w-full md:w-64 md:fixed md:h-screen bg-gray-100 p-4">
-        <h2 class="text-xl font-bold mb-4 text-gray-800">{% trans "Danh mục sản phẩm" %}</h2>
-        <ul class="space-y-2">
-            <li>
-                <a href="{% url 'products:product_list' %}" class="text-blue-600 hover:underline {% if not selected_category %}font-bold{% endif %}">
+<div class="win95-window">
+    <div class="win95-titlebar">{% trans "Danh sách sản phẩm" %}</div>
+    <div class="win95-content">
+        <!-- Sidebar -->
+        <div class="win95-sidebar">
+            <h3 class="win95-subtitle">{% trans "Danh mục" %}</h3>
+            <div class="win95-category-list">
+                <a href="{% url 'products:product_list' %}"
+                   class="win95-category {% if not selected_category %}active{% endif %}">
                     {% trans "Tất cả" %}
                 </a>
-            </li>
-            {% for category in categories %}
-                <li>
+                {% for category in categories %}
                     <a href="{% url 'products:product_list' %}?category={{ category.id }}"
-                       class="text-blue-600 hover:underline {% if selected_category == category.id %}font-bold{% endif %}">
+                       class="win95-category {% if selected_category == category.id %}active{% endif %}">
                         {{ category.name }}
                     </a>
-                </li>
-            {% endfor %}
-        </ul>
-    </aside>
-
-    <!-- Nội dung chính: Danh sách sản phẩm -->
-    <main class="w-full md:ml-64 p-4">
-        <h1 class="text-3xl font-bold mb-6 text-gray-800">{% trans "Sản phẩm" %}</h1>
-
-        <!-- Tìm kiếm và sắp xếp -->
-        <div class="flex flex-col md:flex-row justify-between mb-6">
-            <!-- Tìm kiếm -->
-            <form method="get" class="flex mb-4 md:mb-0">
-                <input type="text" name="q" value="{{ search_query }}" placeholder="{% trans 'Tìm kiếm sản phẩm...' %}"
-                       class="border border-gray-300 rounded-md p-2 w-full md:w-64">
-                <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 ml-2">
-                    {% trans "Tìm kiếm" %}
-                </button>
-            </form>
-            <!-- Sắp xếp -->
-            <div>
-                <label for="sort" class="text-gray-700 mr-2">{% trans "Sắp xếp:" %}</label>
-                <select id="sort" onchange="window.location.href=this.value" class="border border-gray-300 rounded-md p-2">
-                    <option value="{% url 'products:product_list' %}?sort=name{% if selected_category %}&category={{ selected_category }}{% endif %}"
-                            {% if sort_by == 'name' %}selected{% endif %}>
-                        {% trans "Tên (A-Z)" %}
-                    </option>
-                    <option value="{% url 'products:product_list' %}?sort=price_asc{% if selected_category %}&category={{ selected_category }}{% endif %}"
-                            {% if sort_by == 'price_asc' %}selected{% endif %}>
-                        {% trans "Giá (Thấp - Cao)" %}
-                    </option>
-                    <option value="{% url 'products:product_list' %}?sort=price_desc{% if selected_category %}&category={{ selected_category }}{% endif %}"
-                            {% if sort_by == 'price_desc' %}selected{% endif %}>
-                        {% trans "Giá (Cao - Thấp)" %}
-                    </option>
-                </select>
+                {% endfor %}
             </div>
         </div>
 
-        <!-- Danh sách sản phẩm -->
-        {% if products %}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Nội dung chính -->
+        <div class="win95-main">
+            <!-- Thanh công cụ -->
+            <div class="win95-toolbar">
+                <form method="get" class="win95-search">
+                    <input type="text" name="q" value="{{ search_query }}"
+                           placeholder="{% trans 'Tìm sản phẩm...' %}"
+                           class="win95-input">
+                    <button type="submit" class="win95-button">
+                        {% trans "Tìm" %}
+                    </button>
+                </form>
+                <select class="win95-dropdown" onchange="window.location.href=this.value">
+                    <option value="?sort=name" {% if sort_by == 'name' %}selected{% endif %}>
+                        {% trans "Tên (A-Z)" %}
+                    </option>
+                    <!-- Các option khác -->
+                </select>
+            </div>
+
+            <!-- Danh sách sản phẩm -->
+            <div class="win95-product-grid">
                 {% for product in products %}
-                    <div class="bg-white rounded-lg shadow-md p-4">
-                        {% if product.image %}
-                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-48 object-cover rounded-md mb-4">
-                        {% else %}
-                            <div class="w-full h-48 bg-gray-200 rounded-md mb-4 flex items-center justify-center">
-                                <span class="text-gray-500">{% trans "Không có hình ảnh" %}</span>
+                    <div class="win95-product">
+                        <div class="win95-product-image">
+                            {% if product.image %}
+                                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                            {% else %}
+                                <div class="win95-no-image-small">
+                                    <span>{% trans "Không có ảnh" %}</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="win95-product-info">
+                            <h4>{{ product.name }}</h4>
+                            <p>{{ product.price }} VNĐ</p>
+                            <div class="win95-product-buttons">
+                                <a href="{% url 'cart:add_to_cart' product.id %}" class="win95-button">
+                                    {% trans "Thêm giỏ hàng" %}
+                                </a>
+                                <a href="{% url 'products:product_detail' product.id %}" class="win95-button">
+                                    {% trans "Xem chi tiết" %}
+                                </a>
                             </div>
-                        {% endif %}
-                        <h3 class="text-lg font-semibold text-gray-800">{{ product.name }}</h3>
-                        <p class="text-gray-600 mb-2">{{ product.price }} VNĐ</p>
-                        <div class="flex space-x-2">
-                            <a href="{% url 'cart:add_to_cart' product.id %}" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-                                {% trans "Thêm vào giỏ hàng" %}
-                            </a>
-                            <a href="{% url 'products:product_detail' product.id %}" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
-                                {% trans "Chi tiết" %}
-                            </a>
                         </div>
                     </div>
                 {% endfor %}
             </div>
 
             <!-- Phân trang -->
-            <div class="mt-6 flex justify-center">
-                <nav class="inline-flex rounded-md shadow">
-                    {% if page_obj.has_previous %}
-                        <a href="?page={{ page_obj.previous_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
-                           class="px-3 py-2 bg-white border border-gray-300 text-blue-600 hover:bg-gray-100 rounded-l-md">
-                            {% trans "Trước" %}
-                        </a>
-                    {% endif %}
-                    <span class="px-3 py-2 bg-white border border-gray-300 text-gray-700">
-                        {% trans "Trang" %} {{ page_obj.number }} {% trans "của" %} {{ page_obj.paginator.num_pages }}
-                    </span>
-                    {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}"
-                           class="px-3 py-2 bg-white border border-gray-300 text-blue-600 hover:bg-gray-100 rounded-r-md">
-                            {% trans "Tiếp" %}
-                        </a>
-                    {% endif %}
-                </nav>
+            <div class="win95-pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="win95-button">
+                        &laquo; {% trans "Trước" %}
+                    </a>
+                {% endif %}
+                <span class="win95-page-number">
+                    {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="win95-button">
+                        {% trans "Tiếp" %} &raquo;
+                    </a>
+                {% endif %}
             </div>
-        {% else %}
-            <p class="text-gray-600">{% trans "Chưa có sản phẩm nào." %}</p>
-        {% endif %}
-    </main>
+        </div>
+    </div>
 </div>
+
+<style>
+    .win95-sidebar {
+        width: 200px;
+        float: left;
+        margin-right: 20px;
+    }
+    .win95-category-list {
+        border: 2px solid #000;
+        padding: 4px;
+        background: #fff;
+    }
+    .win95-category {
+        display: block;
+        padding: 4px;
+        margin: 4px 0;
+        background: #c0c0c0;
+        border: 2px solid #000;
+        text-decoration: none;
+        color: #000;
+    }
+    .win95-category.active {
+        background: #000080;
+        color: #fff;
+    }
+    .win95-toolbar {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+    }
+    .win95-input {
+        padding: 4px;
+        border: 2px solid #000;
+        background: #fff;
+        width: 200px;
+    }
+    .win95-dropdown {
+        padding: 4px;
+        border: 2px solid #000;
+        background: #fff;
+    }
+    .win95-product-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    .win95-product {
+        border: 2px solid #000;
+        padding: 10px;
+        background: #fff;
+    }
+    .win95-product-image img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+    }
+    .win95-no-image-small {
+        background: #c0c0c0;
+        height: 150px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .win95-product-buttons {
+        margin-top: 10px;
+        display: flex;
+        gap: 8px;
+    }
+    .win95-pagination {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+</style>
 {% endblock %}

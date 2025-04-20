@@ -1,24 +1,61 @@
+<!-- base_admin.html -->
+{% load static %}
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Admin Dashboard{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f1f3f6; font-family: 'Segoe UI', sans-serif; }
+    .sidebar { width: 260px; background: #1e1e2f; color: #fff; height: 100vh; position: fixed; top: 0; left: 0; padding-top: 60px; overflow-y: auto; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+    .sidebar a { color: #cfd8dc; padding: 15px 25px; display: block; text-decoration: none; transition: background 0.3s; }
+    .sidebar a:hover, .sidebar a.active { background-color: #343a40; color: #fff; }
+    .main-content { margin-left: 260px; padding: 30px; }
+    .navbar { height: 60px; background-color: #2d2d44; }
+    .navbar-brand, .nav-link { color: #fff !important; }
+    .card { border: none; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    footer { background: #fff; padding: 20px; text-align: center; font-size: 14px; color: #777; }
+  </style>
 </head>
-<body class="bg-gray-100">
-    <nav class="bg-green-600 p-4 text-white">
-        <div class="container mx-auto flex justify-between">
-            <a href="{% url 'reports:sales_report' %}" class="text-2xl font-bold">Admin Dashboard</a>
-            <div>
-                <a href="{% url 'admin:index' %}" class="px-4">Quản lý</a>
-                <a href="{% url 'accounts:logout' %}" class="px-4">Đăng xuất</a>
-            </div>
-        </div>
-    </nav>
-    <div class="container mx-auto mt-6">
-        {% block content %}
-        {% endblock %}
+<body>
+  <nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'admin:index' %}"><i class="fas fa-cogs"></i> Admin</a>
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+          </li>
+        </ul>
+      </div>
     </div>
+  </nav>
+
+  <div class="sidebar">
+    <a href="{% url 'admin:index' %}" class="{% if request.path == '/admin/' %}active{% endif %}"><i class="fas fa-home"></i> Dashboard</a>
+    {% if app_list %}
+      {% for app in app_list %}
+        {% for model in app.models %}
+          <a href="{{ model.admin_url }}">{{ model.name }}</a>
+        {% endfor %}
+      {% endfor %}
+    {% endif %}
+    <hr class="text-secondary mx-3">
+    <a href="{% url 'reports:sales_report' %}"><i class="fas fa-chart-line"></i> Báo cáo doanh thu</a>
+  </div>
+
+  <div class="main-content">
+    {% block content %}{% endblock %}
+  </div>
+
+  <footer>
+    &copy; {{ now|date:"Y" }} Your Company. All rights reserved.
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

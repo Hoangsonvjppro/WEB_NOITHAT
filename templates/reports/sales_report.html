@@ -1,33 +1,52 @@
 {% extends 'base_admin.html' %}
 
 {% block content %}
-    <h1 class="text-2xl mb-4">Báo cáo doanh thu</h1>
+<div class="container mt-4 p-3 bg-light border border-2 border-dark" style="border-top-color: #fff; border-left-color: #fff; border-right-color: #808080; border-bottom-color: #808080;">
+    <h1 class="fs-3 fw-bold mb-3" style="font-family: 'MS Sans Serif', Arial, sans-serif;">Báo cáo doanh thu</h1>
     <form method="get" class="mb-4">
-        <label for="start_date">Từ ngày:</label>
-        <input type="date" name="start_date" id="start_date" value="{{ start_date }}" class="border p-2">
-        <label for="end_date" class="ml-4">Đến ngày:</label>
-        <input type="date" name="end_date" id="end_date" value="{{ end_date }}" class="border p-2">
-        <button type="submit" class="bg-blue-600 text-white p-2 rounded ml-2">Lọc</button>
+        <div class="row g-3 align-items-center">
+            <div class="col-auto">
+                <label for="start_date" class="col-form-label" style="font-family: 'MS Sans Serif', Arial, sans-serif;">Từ ngày:</label>
+            </div>
+            <div class="col-auto">
+                <input type="date" name="start_date" id="start_date" value="{{ start_date }}" class="form-control win95-input" style="border: 2px solid #000; border-top-color: #808080; border-left-color: #808080; border-right-color: #fff; border-bottom-color: #fff; background-color: #fff;">
+            </div>
+            <div class="col-auto">
+                <label for="end_date" class="col-form-label" style="font-family: 'MS Sans Serif', Arial, sans-serif;">Đến ngày:</label>
+            </div>
+            <div class="col-auto">
+                <input type="date" name="end_date" id="end_date" value="{{ end_date }}" class="form-control win95-input" style="border: 2px solid #000; border-top-color: #808080; border-left-color: #808080; border-right-color: #fff; border-bottom-color: #fff; background-color: #fff;">
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn win95-btn" style="background-color: #c0c0c0; border: 2px solid #000; border-top-color: #fff; border-left-color: #fff; border-right-color: #808080; border-bottom-color: #808080; font-family: 'MS Sans Serif', Arial, sans-serif;">Lọc</button>
+            </div>
+        </div>
     </form>
-    <h2 class="text-xl">Tổng doanh thu: {{ total_revenue }} VNĐ</h2>
-    <table class="w-full border-collapse border">
+    <h2 class="fs-4 mb-3" style="font-family: 'MS Sans Serif', Arial, sans-serif;">Tổng doanh thu: {{ total_revenue }} VNĐ</h2>
+    <table class="table table-bordered win95-table" style="background-color: #fff; border: 2px solid #000; border-top-color: #808080; border-left-color: #808080; border-right-color: #fff; border-bottom-color: #fff;">
         <thead>
-            <tr>
-                <th class="border p-2">Mã đơn hàng</th>
-                <th class="border p-2">Khách hàng</th>
-                <th class="border p-2">Ngày đặt</th>
-                <th class="border p-2">Tổng tiền</th>
+            <tr style="background-color: #000080; color: white;">
+                <th class="p-2">Mã đơn hàng</th>
+                <th class="p-2">Khách hàng</th>
+                <th class="p-2">Ngày đặt</th>
+                <th class="p-2">Tổng tiền</th>
             </tr>
         </thead>
         <tbody>
             {% for order in orders %}
                 <tr>
-                    <td class="border p-2">{{ order.id }}</td>
-                    <td class="border p-2">{{ order.customer }}</td>
-                    <td class="border p-2">{{ order.order_date }}</td>
-                    <td class="border p-2">{{ order.total_amount }}</td>
+                    <td class="p-2">{{ order.id }}</td>
+                    <td class="p-2">{{ order.user.username }}</td>
+                    <td class="p-2">{{ order.order_date|date:"Y-m-d" }}</td>
+                    <td class="p-2">{{ order.total_price }}</td>
                 </tr>
             {% endfor %}
+            {% if not orders %}
+                <tr>
+                    <td colspan="4" class="p-2 text-center">Không có đơn hàng trong khoảng thời gian này.</td>
+                </tr>
+            {% endif %}
         </tbody>
     </table>
+</div>
 {% endblock %}

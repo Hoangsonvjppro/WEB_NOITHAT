@@ -1,15 +1,32 @@
 {% extends 'base_customer.html' %}
+{% load static i18n %}
 {% block content %}
-<h1>Thông tin cá nhân</h1>
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert {{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-{% endif %}
-<form method="post">
+<div style="font-family:'MS Sans Serif',Arial,sans-serif; background:#c0c0c0; border:2px solid #000; border-top-color:#fff; border-left-color:#fff; border-right-color:#808080; border-bottom-color:#808080; width:380px; margin:50px auto;">
+  <div style="background:#000080; color:#fff; padding:4px 8px; font-size:14px; font-weight:bold;">
+    {% trans "Thông tin cá nhân" %}
+  </div>
+  {% if messages %}
+    <div style="padding:4px 8px;">
+      {% for message in messages %}
+        <div style="color: {% if message.tags == 'error' %}#a80000{% else %}#005a00{% endif %}; font-size:11px; margin-bottom:4px;">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  <form method="post" style="padding:8px;">
     {% csrf_token %}
-    <label>Username: <input type="text" name="username" value="{{ user.username }}"></label>
-    <label>Email: <input type="email" name="email" value="{{ user.email }}"></label>
-    <button type="submit">Cập nhật</button>
-</form>
+    <div style="margin-bottom:8px;">
+      <label for="username" style="display:block; font-size:12px; margin-bottom:2px;">{% trans "Username" %}</label>
+      <input type="text" name="username" id="username" value="{{ user.username }}"
+             style="width:100%; padding:4px; font-size:12px; font-family:'MS Sans Serif'; background:#fff; border:2px solid #000; border-top-color:#fff; border-left-color:#fff; border-right-color:#808080; border-bottom-color:#808080;">
+    </div>
+    <div style="margin-bottom:8px;">
+      <label for="email" style="display:block; font-size:12px; margin-bottom:2px;">{% trans "Email" %}</label>
+      <input type="email" name="email" id="email" value="{{ user.email }}"
+             style="width:100%; padding:4px; font-size:12px; font-family:'MS Sans Serif'; background:#fff; border:2px solid #000; border-top-color:#fff; border-left-color:#fff; border-right-color:#808080; border-bottom-color:#808080;">
+    </div>
+    <button type="submit" style="font-family:'MS Sans Serif'; font-size:12px; padding:4px 12px; background:#c0c0c0; border:2px solid #000; border-top-color:#fff; border-left-color:#fff; border-right-color:#808080; border-bottom-color:#808080; cursor:pointer;">
+      {% trans "Cập nhật" %}
+    </button>
+  </form>
+</div>
 {% endblock %}

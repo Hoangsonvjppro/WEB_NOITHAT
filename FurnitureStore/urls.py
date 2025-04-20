@@ -9,6 +9,7 @@ urlpatterns = [
     path('', include('apps.products.urls')),
     path('cart/', include('apps.cart.urls')),
     path('orders/', include('apps.orders.urls')),
+    path('reports/', include('apps.reports.urls')),
 ]
 
 # Thêm cấu hình để phục vụ tệp media trong môi trường phát triển
