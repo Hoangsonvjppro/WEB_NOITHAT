@@ -1,105 +1,213 @@
 {% extends 'base_customer.html' %}
 {% load static i18n %}
 
+{% block title %}{% trans "Thanh toán" %}{% endblock %}
+
 {% block content %}
 <div class="win95-window">
-    <div class="win95-titlebar">{% trans "Thanh toán" %}</div>
-    <div class="win95-content">
-        <div class="win95-checkout-layout">
-            <!-- Danh sách sản phẩm -->
-            <div class="win95-cart-items">
-                <h3 class="win95-subtitle">{% trans "Sản phẩm trong giỏ hàng" %}</h3>
-                {% for item in cart.cartitem_set.all %}
-                    <div class="win95-cart-item">
-                        {% if item.product.image %}
-                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
-                        {% else %}
-                            <div class="win95-no-image-small">
-                                <span>{% trans "Không có ảnh" %}</span>
+    <div class="win95-titlebar">
+        <span><i class="bi bi-credit-card me-2"></i>{% trans "Thanh toán" %}</span>
+    </div>
+    <div class="win95-content p-3">
+        <div class="row">
+            <!-- Delivery Information -->
+            <div class="col-lg-8 mb-4">
+                <div class="win95-window mb-0">
+                    <div class="win95-titlebar">
+                        <span><i class="bi bi-person-lines-fill me-2"></i>{% trans "Thông tin giao hàng" %}</span>
+                    </div>
+                    <div class="win95-content p-3">
+                        <form id="shippingForm">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="firstName" class="form-label">{% trans "Họ" %}</label>
+                                    <input type="text" class="win95-input form-control" id="firstName" value="{{ user.first_name }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="lastName" class="form-label">{% trans "Tên" %}</label>
+                                    <input type="text" class="win95-input form-control" id="lastName" value="{{ user.last_name }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label">{% trans "Email" %}</label>
+                                    <input type="email" class="win95-input form-control" id="email" value="{{ user.email }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="phone" class="form-label">{% trans "Số điện thoại" %}</label>
+                                    <input type="tel" class="win95-input form-control" id="phone" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="address" class="form-label">{% trans "Địa chỉ" %}</label>
+                                    <input type="text" class="win95-input form-control" id="address" required>
+                                </div>
+                                <div class="col-md-5">
+                                    <label for="city" class="form-label">{% trans "Thành phố" %}</label>
+                                    <input type="text" class="win95-input form-control" id="city" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="district" class="form-label">{% trans "Quận/Huyện" %}</label>
+                                    <input type="text" class="win95-input form-control" id="district" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="zip" class="form-label">{% trans "Mã bưu điện" %}</label>
+                                    <input type="text" class="win95-input form-control" id="zip">
+                                </div>
                             </div>
-                        {% endif %}
-                        <div class="win95-cart-info">
-                            <h4>{{ item.product.name }}</h4>
-                            <p>{% trans "Số lượng:" %} {{ item.quantity }}</p>
-                            <p>{{ item.product.price }} VNĐ</p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <div class="win95-window mb-4">
+                    <div class="win95-titlebar">
+                        <span><i class="bi bi-cart-check me-2"></i>{% trans "Đơn hàng của bạn" %}</span>
+                    </div>
+                    <div class="win95-content p-0">
+                        <div class="table-responsive">
+                            <table class="table mb-0">
+                                <thead style="background-color: #c0c0c0; border-bottom: 1px solid #808080;">
+                                    <tr>
+                                        <th>{% trans "Sản phẩm" %}</th>
+                                        <th class="text-end">{% trans "Tổng" %}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in cart.cartitem_set.all %}
+                                    <tr>
+                                        <td>
+                                            <span class="d-block">{{ item.product.name }}</span>
+                                            <small class="text-muted">{{ item.quantity }} x {{ item.product.price }} VNĐ</small>
+                                        </td>
+                                        <td class="text-end">{{ item.total_price }} VNĐ</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot style="background-color: #f0f0f0; border-top: 1px solid #808080;">
+                                    <tr>
+                                        <th>{% trans "Tạm tính" %}</th>
+                                        <td class="text-end">{{ cart.total_price }} VNĐ</td>
+                                    </tr>
+                                    <tr>
+                                        <th>{% trans "Phí giao hàng" %}</th>
+                                        <td class="text-end">0 VNĐ</td>
+                                    </tr>
+                                    <tr>
+                                        <th>{% trans "Tổng cộng" %}</th>
+                                        <td class="text-end"><strong style="color: #000080;">{{ cart.total_price }} VNĐ</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
                         </div>
                     </div>
-                {% endfor %}
-            </div>
-
-            <!-- Form thanh toán -->
-            <div class="win95-payment-form">
-                <h3 class="win95-subtitle">{% trans "Thông tin thanh toán" %}</h3>
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="win95-radio-group">
-                        <label class="win95-radio">
-                            <input type="radio" name="payment_method" value="Cash" checked>
-                            <span>{% trans "Tiền mặt" %}</span>
-                            <small>{% trans "Thanh toán khi nhận hàng" %}</small>
-                        </label>
-                        <label class="win95-radio">
-                            <input type="radio" name="payment_method" value="Card">
-                            <span>{% trans "Thẻ tín dụng" %}</span>
-                            <small>{% trans "Thanh toán trực tuyến" %}</small>
-                        </label>
+                </div>
+                
+                <!-- Payment Methods -->
+                <div class="win95-window mb-4">
+                    <div class="win95-titlebar">
+                        <span><i class="bi bi-wallet me-2"></i>{% trans "Phương thức thanh toán" %}</span>
                     </div>
-                    <div class="win95-total">
-                        <span>{% trans "Tổng cộng:" %}</span>
-                        <strong>{{ cart.total_price }} VNĐ</strong>
+                    <div class="win95-content p-3">
+                        <form method="post" id="paymentForm">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="cashOnDelivery" value="Cash" checked>
+                                    <label class="form-check-label d-flex align-items-center" for="cashOnDelivery">
+                                        <i class="bi bi-cash me-2" style="font-size: 1.25rem;"></i>
+                                        <div>
+                                            <strong>{% trans "Tiền mặt khi nhận hàng" %}</strong>
+                                            <small class="d-block text-muted">{% trans "Thanh toán khi nhận hàng" %}</small>
+                                        </div>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" id="creditCard" value="Card">
+                                    <label class="form-check-label d-flex align-items-center" for="creditCard">
+                                        <i class="bi bi-credit-card me-2" style="font-size: 1.25rem;"></i>
+                                        <div>
+                                            <strong>{% trans "Thẻ tín dụng/Ghi nợ" %}</strong>
+                                            <small class="d-block text-muted">{% trans "Thanh toán an toàn qua cổng thanh toán" %}</small>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div id="creditCardFields" class="d-none mb-3">
+                                <div class="mb-3">
+                                    <label for="cardNumber" class="form-label">{% trans "Số thẻ" %}</label>
+                                    <input type="text" class="win95-input form-control" id="cardNumber" placeholder="XXXX XXXX XXXX XXXX">
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="expDate" class="form-label">{% trans "Ngày hết hạn" %}</label>
+                                        <input type="text" class="win95-input form-control" id="expDate" placeholder="MM/YY">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cvv" class="form-label">{% trans "CVV" %}</label>
+                                        <input type="text" class="win95-input form-control" id="cvv" placeholder="XXX">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" value="" id="terms" required>
+                                <label class="form-check-label" for="terms">
+                                    {% trans "Tôi đã đọc và đồng ý với" %} <a href="#" class="text-decoration-none">{% trans "điều khoản và điều kiện" %}</a>
+                                </label>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="win95-btn" style="background-color: #000080; color: white;">
+                                    <i class="bi bi-check-circle me-2"></i>{% trans "Xác nhận đặt hàng" %}
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                    <button type="submit" class="win95-button">
-                        {% trans "Xác nhận thanh toán" %}
-                    </button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<style>
-    .win95-checkout-layout {
-        display: flex;
-        gap: 20px;
-    }
-    .win95-cart-items {
-        flex: 2;
-    }
-    .win95-payment-form {
-        flex: 1;
-        border: 2px solid #000;
-        padding: 10px;
-        background: #fff;
-    }
-    .win95-cart-item {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 10px;
-        padding: 10px;
-        border: 2px solid #000;
-        background: #fff;
-    }
-    .win95-cart-item img {
-        width: 100px;
-        height: 100px;
-        object-fit: cover;
-    }
-    .win95-radio-group {
-        margin-bottom: 20px;
-    }
-    .win95-radio {
-        display: block;
-        margin: 10px 0;
-        padding: 8px;
-        border: 2px solid #000;
-        background: #c0c0c0;
-    }
-    .win95-total {
-        border-top: 2px solid #000;
-        padding-top: 10px;
-        display: flex;
-        justify-content: space-between;
-        margin: 20px 0;
-    }
-</style>
+{% block extrascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle credit card fields
+    const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+    const creditCardFields = document.getElementById('creditCardFields');
+    
+    paymentMethods.forEach(method => {
+        method.addEventListener('change', function() {
+            if (this.value === 'Card') {
+                creditCardFields.classList.remove('d-none');
+            } else {
+                creditCardFields.classList.add('d-none');
+            }
+        });
+    });
+    
+    // Form validation and submission
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+        const shippingForm = document.getElementById('shippingForm');
+        const shippingInputs = shippingForm.querySelectorAll('input[required]');
+        let isValid = true;
+        
+        shippingInputs.forEach(input => {
+            if (!input.value.trim()) {
+                isValid = false;
+                input.classList.add('is-invalid');
+            } else {
+                input.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('{% trans "Vui lòng điền đầy đủ thông tin giao hàng" %}');
+        }
+    });
+});
+</script>
 {% endblock %}

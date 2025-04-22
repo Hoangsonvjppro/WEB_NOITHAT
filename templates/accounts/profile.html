@@ -1,32 +1,72 @@
 {% extends 'base_customer.html' %}
 {% load static i18n %}
+{% block title %}{% trans "Hồ sơ người dùng" %}{% endblock %}
 {% block content %}
-<div style="font-family:'MS Sans Serif',Arial,sans-serif; background:#c0c0c0; border:2px solid #000; border-top-color:#fff; border-left-color:#fff; border-right-color:#808080; border-bottom-color:#808080; width:380px; margin:50px auto;">
-  <div style="background:#000080; color:#fff; padding:4px 8px; font-size:14px; font-weight:bold;">
-    {% trans "Thông tin cá nhân" %}
+<div class="win95-window" style="max-width: 600px; margin: 30px auto;">
+  <div class="win95-titlebar">
+    <span><i class="bi bi-person-badge me-2"></i>{% trans "Thông tin cá nhân" %}</span>
+    <span class="ms-auto" style="display: inline-block; width: 18px; height: 18px; text-align: center; font-family: sans-serif; border: 1px solid #fff; margin-left: 4px; cursor: default;">x</span>
   </div>
-  {% if messages %}
-    <div style="padding:4px 8px;">
-      {% for message in messages %}
-        <div style="color: {% if message.tags == 'error' %}#a80000{% else %}#005a00{% endif %}; font-size:11px; margin-bottom:4px;">{{ message }}</div>
-      {% endfor %}
+  <div class="win95-content">
+    {% if messages %}
+      <div class="mb-4">
+        {% for message in messages %}
+          <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+    
+    <div class="row">
+      <div class="col-md-4 mb-4 mb-md-0">
+        <div style="border: 2px solid #000; border-top-color: #fff; border-left-color: #fff; border-right-color: #808080; border-bottom-color: #808080; padding: 12px; background: #f0f0f0;">
+          <div style="width: 120px; height: 120px; background: #c0c0c0; border: 2px solid #000; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;">
+            <i class="bi bi-person" style="font-size: 60px;"></i>
+          </div>
+          <div class="text-center">
+            <h5 style="font-size: 16px; margin-bottom: 4px;">{{ user.username }}</h5>
+            <p style="font-size: 14px; margin-bottom: 0;">{% trans "Tham gia từ:" %} {{ user.date_joined|date:"d/m/Y" }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-8">
+        <form method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="username" class="form-label">{% trans "Tên người dùng" %}</label>
+            <input type="text" name="username" id="username" value="{{ user.username }}" class="win95-input form-control">
+          </div>
+          
+          <div class="mb-3">
+            <label for="email" class="form-label">{% trans "Email" %}</label>
+            <input type="email" name="email" id="email" value="{{ user.email }}" class="win95-input form-control">
+          </div>
+          
+          <div class="mb-3">
+            <label for="first_name" class="form-label">{% trans "Họ" %}</label>
+            <input type="text" name="first_name" id="first_name" value="{{ user.first_name }}" class="win95-input form-control">
+          </div>
+          
+          <div class="mb-3">
+            <label for="last_name" class="form-label">{% trans "Tên" %}</label>
+            <input type="text" name="last_name" id="last_name" value="{{ user.last_name }}" class="win95-input form-control">
+          </div>
+          
+          <div class="d-grid gap-2">
+            <button type="submit" class="win95-btn">
+              <i class="bi bi-save me-2"></i>{% trans "Cập nhật" %}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
-  {% endif %}
-  <form method="post" style="padding:8px;">
-    {% csrf_token %}
-    <div style="margin-bottom:8px;">
-      <label for="username" style="display:block; font-size:12px; margin-bottom:2px;">{% trans "Username" %}</label>
-      <input type="text" name="username" id="username" value="{{ user.username }}"
-             style="width:100%; padding:4px; font-size:12px; font-family:'MS Sans Serif'; background:#fff; border:2px solid #000; border-top-color:#fff; border-left-color:#fff; border-right-color:#808080; border-bottom-color:#808080;">
+    
+    <div class="mt-4 pt-4" style="border-top: 2px solid #000; border-top-color: #808080;">
+      <h5 style="font-size: 16px; margin-bottom: 12px;"><i class="bi bi-shield-lock me-2"></i>{% trans "Bảo mật" %}</h5>
+      <a href="#" class="win95-btn">{% trans "Đổi mật khẩu" %}</a>
     </div>
-    <div style="margin-bottom:8px;">
-      <label for="email" style="display:block; font-size:12px; margin-bottom:2px;">{% trans "Email" %}</label>
-      <input type="email" name="email" id="email" value="{{ user.email }}"
-             style="width:100%; padding:4px; font-size:12px; font-family:'MS Sans Serif'; background:#fff; border:2px solid #000; border-top-color:#fff; border-left-color:#fff; border-right-color:#808080; border-bottom-color:#808080;">
-    </div>
-    <button type="submit" style="font-family:'MS Sans Serif'; font-size:12px; padding:4px 12px; background:#c0c0c0; border:2px solid #000; border-top-color:#fff; border-left-color:#fff; border-right-color:#808080; border-bottom-color:#808080; cursor:pointer;">
-      {% trans "Cập nhật" %}
-    </button>
-  </form>
+  </div>
 </div>
 {% endblock %}

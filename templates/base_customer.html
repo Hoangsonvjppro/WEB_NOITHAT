@@ -4,160 +4,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "Furniture Store" %}</title>
+    <title>{% block title %}{% trans "Furniture Store" %}{% endblock %}</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
+        :root {
+            --win95-bg: #c0c0c0;
+            --win95-border-light: #fff;
+            --win95-border-dark: #808080;
+            --win95-border-black: #000;
+            --win95-title-bg: #000080;
+            --win95-title-text: #fff;
+            --win95-button-bg: #c0c0c0;
+            --win95-highlight: #000080;
+        }
+        
         body {
-            background: #c0c0c0;
+            background: var(--win95-bg);
             font-family: 'MS Sans Serif', Arial, sans-serif;
-            font-size: 12px;
+            font-size: 14px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
-        .navbar {
-            background: #c0c0c0;
-            border: 2px solid #000;
-            border-top-color: #fff;
-            border-left-color: #fff;
-            border-right-color: #808080;
-            border-bottom-color: #808080;
-            box-shadow: 2px 2px 0 #000;
+        
+        .win95-window {
+            border: 2px solid var(--win95-border-black);
+            border-top-color: var(--win95-border-light);
+            border-left-color: var(--win95-border-light);
+            border-right-color: var(--win95-border-dark);
+            border-bottom-color: var(--win95-border-dark);
+            background: var(--win95-bg);
+            box-shadow: 2px 2px 0 var(--win95-border-black);
+            margin-bottom: 16px;
         }
-        .navbar a {
+        
+        .win95-titlebar {
+            background: var(--win95-title-bg);
+            color: var(--win95-title-text);
+            padding: 4px 8px;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .win95-content {
+            padding: 12px;
+            background: var(--win95-bg);
+        }
+        
+        .navbar {
+            background: var(--win95-bg);
+            border: 2px solid var(--win95-border-black);
+            border-top-color: var(--win95-border-light);
+            border-left-color: var(--win95-border-light);
+            border-right-color: var(--win95-border-dark);
+            border-bottom-color: var(--win95-border-dark);
+            box-shadow: 2px 2px 0 var(--win95-border-black);
+            padding: 8px;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: var(--win95-title-bg) !important;
+            font-size: 16px;
+        }
+        
+        .win95-nav-link {
             color: #000;
             text-decoration: none;
-            padding: 4px 8px;
-            border: 2px solid #000;
-            border-top-color: #fff;
-            border-left-color: #fff;
-            border-right-color: #808080;
-            border-bottom-color: #808080;
-            margin-right: 4px;
-            font-size: 12px;
+            padding: 6px 12px;
+            border: 2px solid var(--win95-border-black);
+            border-top-color: var(--win95-border-light);
+            border-left-color: var(--win95-border-light);
+            border-right-color: var(--win95-border-dark);
+            border-bottom-color: var(--win95-border-dark);
+            margin-right: 8px;
+            font-size: 14px;
+            display: inline-block;
+            background: var(--win95-button-bg);
         }
-        .navbar a:hover {
+        
+        .win95-nav-link:hover {
             background: #a0a0a0;
         }
-        .navbar a:active {
-            border-top-color: #808080;
-            border-left-color: #808080;
-            border-right-color: #fff;
-            border-bottom-color: #fff;
+        
+        .win95-nav-link:active, .win95-nav-link.active {
+            border-top-color: var(--win95-border-dark);
+            border-left-color: var(--win95-border-dark);
+            border-right-color: var(--win95-border-light);
+            border-bottom-color: var(--win95-border-light);
         }
+        
+        .win95-nav-link i {
+            margin-right: 4px;
+        }
+        
         .container {
             background: #fff;
-            border: 2px solid #000;
-            border-top-color: #fff;
-            border-left-color: #fff;
-            border-right-color: #808080;
-            border-bottom-color: #808080;
-            padding: 12px;
+            border: 2px solid var(--win95-border-black);
+            border-top-color: var(--win95-border-light);
+            border-left-color: var(--win95-border-light);
+            border-right-color: var(--win95-border-dark);
+            border-bottom-color: var(--win95-border-dark);
+            padding: 16px;
             margin-top: 16px;
             margin-bottom: 16px;
             flex: 1 0 auto;
-            box-shadow: 4px 4px 0 #000;
+            box-shadow: 4px 4px 0 var(--win95-border-black);
         }
-        .btn {
-            background: #c0c0c0;
-            border: 2px solid #000;
-            border-top-color: #fff;
-            border-left-color: #fff;
-            border-right-color: #808080;
-            border-bottom-color: #808080;
+        
+        .win95-btn {
+            background: var(--win95-button-bg);
+            border: 2px solid var(--win95-border-black);
+            border-top-color: var(--win95-border-light);
+            border-left-color: var(--win95-border-light);
+            border-right-color: var(--win95-border-dark);
+            border-bottom-color: var(--win95-border-dark);
             color: #000;
             font-family: 'MS Sans Serif', Arial, sans-serif;
-            font-size: 12px;
-            padding: 4px 8px;
-            box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #808080;
+            font-size: 14px;
+            padding: 6px 12px;
+            cursor: pointer;
+            text-align: center;
+            display: inline-block;
+            text-decoration: none;
         }
-        .btn:hover {
+        
+        .win95-btn:hover {
             background: #a0a0a0;
         }
-        .btn:active {
-            border-top-color: #808080;
-            border-left-color: #808080;
-            border-right-color: #fff;
-            border-bottom-color: #fff;
-            box-shadow: inset 1px 1px 0 #808080;
+        
+        .win95-btn:active {
+            border-top-color: var(--win95-border-dark);
+            border-left-color: var(--win95-border-dark);
+            border-right-color: var(--win95-border-light);
+            border-bottom-color: var(--win95-border-light);
         }
-        .card {
-            border: 2px solid #000;
-            border-top-color: #fff;
-            border-left-color: #fff;
-            border-right-color: #808080;
-            border-bottom-color: #808080;
-            background: #fff;
-            box-shadow: 2px 2px 0 #000;
-        }
-        .form-control {
-            border: 2px solid #000;
-            border-top-color: #808080;
-            border-left-color: #808080;
-            border-right-color: #fff;
-            border-bottom-color: #fff;
+        
+        .win95-input {
+            border: 2px solid var(--win95-border-black);
+            border-top-color: var(--win95-border-dark);
+            border-left-color: var(--win95-border-dark);
+            border-right-color: var(--win95-border-light);
+            border-bottom-color: var(--win95-border-light);
             background: #fff;
             font-family: 'MS Sans Serif', Arial, sans-serif;
-            font-size: 12px;
-            box-shadow: inset 1px 1px 0 #808080;
+            font-size: 14px;
+            padding: 6px;
         }
+        
+        .win95-badge {
+            background: var(--win95-highlight);
+            color: #fff;
+            font-size: 12px;
+            padding: 3px 6px;
+            border-radius: 8px;
+            margin-left: 4px;
+        }
+        
         footer {
-            background: #c0c0c0;
-            border: 2px solid #000;
-            border-top-color: #fff;
-            border-left-color: #fff;
-            border-right-color: #808080;
-            border-bottom-color: #808080;
+            background: var(--win95-bg);
+            border: 2px solid var(--win95-border-black);
+            border-top-color: var(--win95-border-light);
+            border-left-color: var(--win95-border-light);
+            border-right-color: var(--win95-border-dark);
+            border-bottom-color: var(--win95-border-dark);
             padding: 8px;
             text-align: center;
             font-size: 12px;
             flex-shrink: 0;
-            box-shadow: 2px 2px 0 #000;
+            box-shadow: 2px 2px 0 var(--win95-border-black);
+            margin-top: auto;
         }
-        img {
-            max-width: 100%;
-            height: auto;
-        }
+        
+        /* Responsive styles */
         @media (max-width: 768px) {
-            .navbar-nav {
+            .win95-nav-container {
+                display: flex;
                 flex-direction: column;
-                align-items: center;
-            }
-            .navbar a {
                 width: 100%;
+            }
+            
+            .win95-nav-link {
+                margin-right: 0;
                 margin-bottom: 8px;
                 text-align: center;
-            }
-            .btn, .form-control {
                 width: 100%;
-                padding: 8px;
-                font-size: 14px;
+            }
+            
+            .container {
+                padding: 12px;
             }
         }
+        
         @media (max-width: 576px) {
             .container {
                 padding: 8px;
             }
+            
+            .win95-btn {
+                display: block;
+                width: 100%;
+                margin-bottom: 8px;
+            }
         }
     </style>
+    {% block extrastyle %}{% endblock %}
 </head>
 <body>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="{% url 'products:product_list' %}">{% trans "Home" %}</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+            <a class="navbar-brand" href="{% url 'products:product_list' %}">
+                <i class="bi bi-shop"></i> {% trans "Furniture Store" %}
+            </a>
+            <button class="navbar-toggler win95-btn" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <i class="bi bi-list"></i>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <div class="navbar-nav">
+                <div class="win95-nav-container ms-auto">
+                    <a href="{% url 'products:product_list' %}" class="win95-nav-link {% if request.path == '/products/' %}active{% endif %}">
+                        <i class="bi bi-grid"></i> {% trans "Sản phẩm" %}
+                    </a>
+                    
                     {% if user.is_authenticated %}
-                        <a href="{% url 'cart:cart' %}">{% trans "Giỏ hàng" %}</a>
-                        <a href="{% url 'orders:order_history' %}">{% trans "Lịch sử đơn hàng" %}</a>
-                        <a href="{% url 'accounts:profile' %}">{% trans "Profile" %}</a>
-                        <a href="{% url 'accounts:logout' %}">{% trans "Đăng xuất" %}</a>
+                        <a href="{% url 'cart:cart' %}" class="win95-nav-link {% if '/cart/' in request.path %}active{% endif %}">
+                            <i class="bi bi-cart"></i> {% trans "Giỏ hàng" %}
+                            {% if cart_item_count > 0 %}<span class="win95-badge">{{ cart_item_count }}</span>{% endif %}
+                        </a>
+                        <a href="{% url 'orders:order_history' %}" class="win95-nav-link {% if '/orders/' in request.path %}active{% endif %}">
+                            <i class="bi bi-box"></i> {% trans "Đơn hàng" %}
+                        </a>
+                        <a href="{% url 'accounts:profile' %}" class="win95-nav-link {% if '/accounts/profile/' in request.path %}active{% endif %}">
+                            <i class="bi bi-person"></i> {% trans "Hồ sơ" %}
+                        </a>
+                        <a href="{% url 'accounts:logout' %}" class="win95-nav-link">
+                            <i class="bi bi-box-arrow-right"></i> {% trans "Đăng xuất" %}
+                        </a>
                     {% else %}
-                        <a href="{% url 'accounts:login' %}">{% trans "Đăng nhập" %}</a>
-                        <a href="{% url 'accounts:register' %}">{% trans "Đăng ký" %}</a>
+                        <a href="{% url 'accounts:login' %}" class="win95-nav-link {% if '/accounts/login/' in request.path %}active{% endif %}">
+                            <i class="bi bi-box-arrow-in-right"></i> {% trans "Đăng nhập" %}
+                        </a>
+                        <a href="{% url 'accounts:register' %}" class="win95-nav-link {% if '/accounts/register/' in request.path %}active{% endif %}">
+                            <i class="bi bi-person-plus"></i> {% trans "Đăng ký" %}
+                        </a>
                     {% endif %}
                 </div>
             </div>
@@ -169,9 +261,21 @@
     </div>
 
     <footer>
-        {% trans "© 2025 Furniture Store. Mọi quyền được bảo lưu." %}
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6 text-md-start text-center mb-2 mb-md-0">
+                    <i class="bi bi-shop"></i> {% trans "© 2025 Furniture Store. Mọi quyền được bảo lưu." %}
+                </div>
+                <div class="col-md-6 text-md-end text-center">
+                    <a href="#" class="text-dark me-2"><i class="bi bi-facebook"></i></a>
+                    <a href="#" class="text-dark me-2"><i class="bi bi-instagram"></i></a>
+                    <a href="#" class="text-dark"><i class="bi bi-twitter-x"></i></a>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extrascript %}{% endblock %}
 </body>
 </html>

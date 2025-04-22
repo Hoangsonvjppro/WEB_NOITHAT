@@ -35,10 +35,8 @@ def cart(request):
 
         return redirect('cart:cart')
 
-    # Tính tổng giá cho từng CartItem
-    for item in cart_items:
-        item.total = item.quantity * item.product.price
-    total_price = sum(item.total for item in cart_items)
+    # Tính tổng giá trị giỏ hàng - không cần gán vào total_price vì đã có property
+    total_price = sum(item.total_price for item in cart_items)
     return render(request, 'cart/cart.html', {'cart_items': cart_items, 'total_price': total_price})
 
 @login_required
@@ -80,7 +78,6 @@ def checkout(request):
                                  total_price=sum(item.product.price * item.quantity for item in cart_items))
     for item in cart_items:
         OrderItem.objects.create(order=order, product=item.product, quantity=item.quantity, price=item.product.price)
-        total_price = sum(item.total_price for item in cart_items)
 
     # Xóa giỏ hàng sau khi thanh toán
     cart_items.delete()

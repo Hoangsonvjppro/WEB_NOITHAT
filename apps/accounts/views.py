@@ -6,6 +6,7 @@ from django.contrib import messages
 from .forms import CustomUserCreationForm
 from .models import Customer
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 
 def register_view(request):
     if request.method == 'POST':
@@ -58,7 +59,7 @@ def profile_view(request):
         else:
             try:
                 # Kiểm tra username trùng lặp
-                if username != user.username and Customer.objects.filter(username=username).exists():
+                if username != user.username and User.objects.filter(username=username).exists():
                     messages.error(request, 'Username này đã được sử dụng.')
                 else:
                     user.username = username

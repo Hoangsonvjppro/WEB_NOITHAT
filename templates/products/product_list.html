@@ -1,168 +1,185 @@
 {% extends 'base_customer.html' %}
 {% load static i18n %}
 
+{% block title %}{% trans "Danh mục sản phẩm" %}{% endblock %}
+
 {% block content %}
 <div class="win95-window">
-    <div class="win95-titlebar">{% trans "Danh sách sản phẩm" %}</div>
+    <div class="win95-titlebar">
+        <span><i class="bi bi-grid-3x3-gap me-2"></i>{% trans "Danh mục sản phẩm" %}</span>
+    </div>
     <div class="win95-content">
-        <!-- Sidebar -->
-        <div class="win95-sidebar">
-            <h3 class="win95-subtitle">{% trans "Danh mục" %}</h3>
-            <div class="win95-category-list">
-                <a href="{% url 'products:product_list' %}"
-                   class="win95-category {% if not selected_category %}active{% endif %}">
-                    {% trans "Tất cả" %}
-                </a>
-                {% for category in categories %}
-                    <a href="{% url 'products:product_list' %}?category={{ category.id }}"
-                       class="win95-category {% if selected_category == category.id %}active{% endif %}">
-                        {{ category.name }}
-                    </a>
-                {% endfor %}
-            </div>
-        </div>
-
-        <!-- Nội dung chính -->
-        <div class="win95-main">
-            <!-- Thanh công cụ -->
-            <div class="win95-toolbar">
-                <form method="get" class="win95-search">
-                    <input type="text" name="q" value="{{ search_query }}"
-                           placeholder="{% trans 'Tìm sản phẩm...' %}"
-                           class="win95-input">
-                    <button type="submit" class="win95-button">
-                        {% trans "Tìm" %}
-                    </button>
-                </form>
-                <select class="win95-dropdown" onchange="window.location.href=this.value">
-                    <option value="?sort=name" {% if sort_by == 'name' %}selected{% endif %}>
-                        {% trans "Tên (A-Z)" %}
-                    </option>
-                    <!-- Các option khác -->
-                </select>
-            </div>
-
-            <!-- Danh sách sản phẩm -->
-            <div class="win95-product-grid">
-                {% for product in products %}
-                    <div class="win95-product">
-                        <div class="win95-product-image">
-                            {% if product.image %}
-                                <img src="{{ product.image.url }}" alt="{{ product.name }}">
-                            {% else %}
-                                <div class="win95-no-image-small">
-                                    <span>{% trans "Không có ảnh" %}</span>
-                                </div>
-                            {% endif %}
+        <div class="row">
+            <!-- Sidebar Categories -->
+            <div class="col-md-3 mb-4">
+                <div class="win95-window mb-0">
+                    <div class="win95-titlebar">
+                        <span><i class="bi bi-tags me-2"></i>{% trans "Danh mục" %}</span>
+                    </div>
+                    <div class="win95-content p-2">
+                        <div class="list-group">
+                            <a href="{% url 'products:product_list' %}" 
+                               class="win95-nav-link mb-2 {% if not selected_category %}active{% endif %}">
+                                <i class="bi bi-grid-fill me-2"></i>{% trans "Tất cả" %}
+                            </a>
+                            {% for category in categories %}
+                                <a href="{% url 'products:product_list' %}?category={{ category.id }}" 
+                                   class="win95-nav-link mb-2 {% if selected_category == category.id %}active{% endif %}">
+                                    <i class="bi bi-tag me-2"></i>{{ category.name }}
+                                </a>
+                            {% endfor %}
                         </div>
-                        <div class="win95-product-info">
-                            <h4>{{ product.name }}</h4>
-                            <p>{{ product.price }} VNĐ</p>
-                            <div class="win95-product-buttons">
-                                <a href="{% url 'cart:add_to_cart' product.id %}" class="win95-button">
-                                    {% trans "Thêm giỏ hàng" %}
-                                </a>
-                                <a href="{% url 'products:product_detail' product.id %}" class="win95-button">
-                                    {% trans "Xem chi tiết" %}
-                                </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9">
+                <!-- Search and Filters -->
+                <div class="win95-window mb-4">
+                    <div class="win95-titlebar">
+                        <span><i class="bi bi-search me-2"></i>{% trans "Tìm kiếm và lọc" %}</span>
+                    </div>
+                    <div class="win95-content p-3">
+                        <div class="row">
+                            <div class="col-md-8 mb-3 mb-md-0">
+                                <form method="get" class="d-flex">
+                                    <input type="text" name="q" value="{{ search_query }}"
+                                           placeholder="{% trans 'Tìm sản phẩm...' %}"
+                                           class="win95-input form-control me-2">
+                                    <button type="submit" class="win95-btn">
+                                        <i class="bi bi-search me-2"></i>{% trans "Tìm" %}
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="win95-input form-select" onchange="window.location.href=this.value">
+                                    <option value="?sort=name" {% if sort_by == 'name' %}selected{% endif %}>
+                                        {% trans "Tên (A-Z)" %}
+                                    </option>
+                                    <option value="?sort=-name" {% if sort_by == '-name' %}selected{% endif %}>
+                                        {% trans "Tên (Z-A)" %}
+                                    </option>
+                                    <option value="?sort=price" {% if sort_by == 'price' %}selected{% endif %}>
+                                        {% trans "Giá (Thấp - Cao)" %}
+                                    </option>
+                                    <option value="?sort=-price" {% if sort_by == '-price' %}selected{% endif %}>
+                                        {% trans "Giá (Cao - Thấp)" %}
+                                    </option>
+                                </select>
                             </div>
                         </div>
                     </div>
-                {% endfor %}
-            </div>
-
-            <!-- Phân trang -->
-            <div class="win95-pagination">
-                {% if page_obj.has_previous %}
-                    <a href="?page={{ page_obj.previous_page_number }}" class="win95-button">
-                        &laquo; {% trans "Trước" %}
-                    </a>
-                {% endif %}
-                <span class="win95-page-number">
-                    {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
-                </span>
-                {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}" class="win95-button">
-                        {% trans "Tiếp" %} &raquo;
-                    </a>
+                </div>
+                
+                <!-- Product Grid -->
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for product in products %}
+                        <div class="col">
+                            <div class="win95-window h-100">
+                                <div class="win95-content p-0">
+                                    <div class="position-relative">
+                                        {% if product.image %}
+                                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-100" style="height: 200px; object-fit: cover;">
+                                        {% else %}
+                                            <div style="height: 200px; background-color: #c0c0c0; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-image" style="font-size: 48px; color: #808080;"></i>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if product.is_new %}
+                                            <span class="badge bg-primary position-absolute top-0 end-0 m-2">{% trans "Mới" %}</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="p-3">
+                                        <h5 class="mb-2" style="font-size: 16px; color: #000080;">{{ product.name }}</h5>
+                                        <div class="mb-2">
+                                            <span class="fw-bold" style="font-size: 18px;">{{ product.price }} VNĐ</span>
+                                        </div>
+                                        
+                                        {% if product.stock_quantity > 0 %}
+                                            <span class="badge bg-success mb-2">{% trans "Còn hàng" %}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger mb-2">{% trans "Hết hàng" %}</span>
+                                        {% endif %}
+                                        
+                                        <div class="mt-3 d-grid gap-2">
+                                            <a href="{% url 'products:product_detail' product.id %}" class="win95-btn">
+                                                <i class="bi bi-info-circle me-2"></i>{% trans "Chi tiết" %}
+                                            </a>
+                                            {% if product.stock_quantity > 0 %}
+                                                <a href="{% url 'cart:add_to_cart' product.id %}" class="win95-btn">
+                                                    <i class="bi bi-cart-plus me-2"></i>{% trans "Thêm vào giỏ" %}
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12">
+                            <div class="win95-window">
+                                <div class="win95-content p-5 text-center">
+                                    <i class="bi bi-exclamation-triangle" style="font-size: 48px; color: #808080;"></i>
+                                    <p class="mt-3">{% trans "Không tìm thấy sản phẩm nào." %}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if page_obj.paginator.num_pages > 1 %}
+                    <div class="win95-window mt-4">
+                        <div class="win95-content p-3">
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center mb-0">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="win95-btn" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                                                &laquo; {% trans "Trước" %}
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                    
+                                    <li class="page-item disabled">
+                                        <span class="win95-btn mx-2" style="cursor: default; opacity: 0.8;">
+                                            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+                                        </span>
+                                    </li>
+                                    
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="win95-btn" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                                                {% trans "Tiếp" %} &raquo;
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
                 {% endif %}
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extrastyle %}
 <style>
-    .win95-sidebar {
-        width: 200px;
-        float: left;
-        margin-right: 20px;
+    .win95-nav-link.active {
+        background-color: #000080;
+        color: white;
     }
-    .win95-category-list {
-        border: 2px solid #000;
-        padding: 4px;
-        background: #fff;
-    }
-    .win95-category {
-        display: block;
-        padding: 4px;
-        margin: 4px 0;
-        background: #c0c0c0;
-        border: 2px solid #000;
-        text-decoration: none;
-        color: #000;
-    }
-    .win95-category.active {
-        background: #000080;
-        color: #fff;
-    }
-    .win95-toolbar {
-        margin-bottom: 20px;
-        display: flex;
-        gap: 10px;
-    }
-    .win95-input {
-        padding: 4px;
-        border: 2px solid #000;
-        background: #fff;
-        width: 200px;
-    }
-    .win95-dropdown {
-        padding: 4px;
-        border: 2px solid #000;
-        background: #fff;
-    }
-    .win95-product-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-    }
-    .win95-product {
-        border: 2px solid #000;
-        padding: 10px;
-        background: #fff;
-    }
-    .win95-product-image img {
-        width: 100%;
-        height: 150px;
-        object-fit: cover;
-    }
-    .win95-no-image-small {
-        background: #c0c0c0;
-        height: 150px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .win95-product-buttons {
-        margin-top: 10px;
-        display: flex;
-        gap: 8px;
-    }
-    .win95-pagination {
-        margin-top: 20px;
-        display: flex;
-        gap: 10px;
-        justify-content: center;
+    
+    @media (max-width: 767.98px) {
+        .pagination {
+            flex-wrap: wrap;
+            gap: 10px;
+        }
     }
 </style>
 {% endblock %}

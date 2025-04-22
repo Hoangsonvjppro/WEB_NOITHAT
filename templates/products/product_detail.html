@@ -1,109 +1,151 @@
 {% extends 'base_customer.html' %}
 {% load static i18n %}
 
+{% block title %}{{ product.name }}{% endblock %}
+
 {% block content %}
 <div class="win95-window">
-    <div class="win95-titlebar">{% trans "Chi tiết sản phẩm" %}</div>
-    <div class="win95-content">
-        <div class="win95-layout">
-            <!-- Hình ảnh -->
-            <div class="win95-image-container">
-                {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="win95-image">
-                {% else %}
-                    <div class="win95-no-image">
-                        <span>{% trans "Không có hình ảnh" %}</span>
-                    </div>
+    <div class="win95-titlebar">
+        <span><i class="bi bi-info-circle me-2"></i>{% trans "Chi tiết sản phẩm" %}</span>
+    </div>
+    <div class="win95-content p-3">
+        <!-- Breadcrumb navigation -->
+        <nav class="mb-4" style="--bs-breadcrumb-divider: '>';">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'products:product_list' %}" class="text-decoration-none">
+                        <i class="bi bi-house"></i> {% trans "Trang chủ" %}
+                    </a>
+                </li>
+                {% if product.category %}
+                <li class="breadcrumb-item">
+                    <a href="{% url 'products:product_list' %}?category={{ product.category.id }}" class="text-decoration-none">
+                        {{ product.category.name }}
+                    </a>
+                </li>
                 {% endif %}
-            </div>
-
-            <!-- Thông tin sản phẩm -->
-            <div class="win95-info-box">
-                <h2 class="win95-heading">{{ product.name }}</h2>
-                <p class="win95-description">{{ product.description }}</p>
-
-                <div class="win95-specs">
-                    <div class="win95-row">
-                        <span>{% trans "Giá:" %}</span>
-                        <strong>{{ product.price }} VNĐ</strong>
-                    </div>
-                    <div class="win95-row">
-                        <span>{% trans "Tồn kho:" %}</span>
-                        <strong>{{ product.stock_quantity }}</strong>
+                <li class="breadcrumb-item active" aria-current="page">{{ product.name }}</li>
+            </ol>
+        </nav>
+        
+        <div class="row">
+            <!-- Product Images -->
+            <div class="col-md-6 mb-4">
+                <div class="win95-window h-100 mb-0">
+                    <div class="win95-content p-0">
+                        {% if product.image %}
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid w-100" style="max-height: 400px; object-fit: contain;">
+                        {% else %}
+                            <div style="height: 400px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center; border: 2px solid #000; border-style: inset;">
+                                <i class="bi bi-image" style="font-size: 64px; color: #808080;"></i>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
-
-                <a href="{% url 'cart:add_to_cart' product.id %}" class="win95-button">
-                    {% trans "Thêm vào giỏ hàng" %}
-                </a>
+            </div>
+            
+            <!-- Product Info -->
+            <div class="col-md-6">
+                <div class="win95-window mb-4">
+                    <div class="win95-titlebar">
+                        <span><i class="bi bi-info-square me-2"></i>{% trans "Thông tin sản phẩm" %}</span>
+                    </div>
+                    <div class="win95-content p-3">
+                        <h1 style="font-size: 24px; color: #000080; margin-bottom: 16px;">{{ product.name }}</h1>
+                        
+                        <div class="mb-4">
+                            <span style="font-size: 22px; font-weight: bold; color: #b12704;">
+                                {{ product.price }} VNĐ
+                            </span>
+                            
+                            {% if product.stock_quantity > 0 %}
+                                <span class="badge bg-success ms-2">{% trans "Còn hàng" %}</span>
+                            {% else %}
+                                <span class="badge bg-danger ms-2">{% trans "Hết hàng" %}</span>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4" style="border: 1px solid #808080; padding: 10px; background-color: #f0f0f0;">
+                            <div class="row mb-2">
+                                <div class="col-5">{% trans "Mã sản phẩm:" %}</div>
+                                <div class="col-7 fw-bold">{{ product.id }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5">{% trans "Danh mục:" %}</div>
+                                <div class="col-7">
+                                    {% if product.category %}
+                                        {{ product.category.name }}
+                                    {% else %}
+                                        {% trans "Không phân loại" %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-5">{% trans "Kho:" %}</div>
+                                <div class="col-7">{{ product.stock_quantity }} {% trans "sản phẩm" %}</div>
+                            </div>
+                        </div>
+                        
+                        {% if product.stock_quantity > 0 %}
+                            <form method="post" action="{% url 'cart:add_to_cart' product.id %}" class="mb-3">
+                                {% csrf_token %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <label for="quantity" class="me-3">{% trans "Số lượng:" %}</label>
+                                    <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ product.stock_quantity }}" class="win95-input form-control" style="width: 80px;">
+                                </div>
+                                <button type="submit" class="win95-btn d-block w-100">
+                                    <i class="bi bi-cart-plus me-2"></i>{% trans "Thêm vào giỏ hàng" %}
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Description -->
+                <div class="win95-window">
+                    <div class="win95-titlebar">
+                        <span><i class="bi bi-file-text me-2"></i>{% trans "Mô tả" %}</span>
+                    </div>
+                    <div class="win95-content p-3">
+                        <p>{{ product.description|linebreaksbr }}</p>
+                    </div>
+                </div>
             </div>
         </div>
+        
+        <!-- Related Products -->
+        {% if related_products %}
+        <div class="win95-window mt-4">
+            <div class="win95-titlebar">
+                <span><i class="bi bi-grid me-2"></i>{% trans "Sản phẩm liên quan" %}</span>
+            </div>
+            <div class="win95-content p-3">
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+                    {% for related in related_products %}
+                    <div class="col">
+                        <div class="win95-window h-100 mb-0">
+                            <div class="win95-content p-0">
+                                <a href="{% url 'products:product_detail' related.id %}" class="text-decoration-none">
+                                    {% if related.image %}
+                                    <img src="{{ related.image.url }}" alt="{{ related.name }}" class="w-100" style="height: 150px; object-fit: cover;">
+                                    {% else %}
+                                    <div style="height: 150px; background-color: #c0c0c0; display: flex; align-items: center; justify-content: center;">
+                                        <i class="bi bi-image" style="font-size: 32px; color: #808080;"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div class="p-2">
+                                        <h5 style="font-size: 14px; color: #000;">{{ related.name }}</h5>
+                                        <span class="fw-bold">{{ related.price }} VNĐ</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 </div>
-
-<style>
-    .win95-layout {
-        display: flex;
-        gap: 20px;
-        padding: 10px;
-    }
-    .win95-image-container {
-        flex: 1;
-        border: 2px solid #000;
-        padding: 4px;
-        background: #fff;
-    }
-    .win95-image {
-        width: 100%;
-        height: 400px;
-        object-fit: cover;
-    }
-    .win95-no-image {
-        background: #c0c0c0;
-        height: 400px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .win95-info-box {
-        flex: 1;
-        padding: 10px;
-    }
-    .win95-heading {
-        font-size: 20px;
-        margin: 0 0 10px 0;
-        color: #000080;
-    }
-    .win95-description {
-        font-size: 14px;
-        margin: 0 0 20px 0;
-    }
-    .win95-specs {
-        border: 2px solid #000;
-        padding: 10px;
-        margin-bottom: 20px;
-        background: #fff;
-    }
-    .win95-row {
-        display: flex;
-        justify-content: space-between;
-        margin: 8px 0;
-    }
-    .win95-button {
-        display: block;
-        width: 100%;
-        padding: 6px;
-        background: #c0c0c0;
-        border: 2px solid #000;
-        border-top-color: #fff;
-        border-left-color: #fff;
-        text-align: center;
-        text-decoration: none;
-        color: #000;
-        font-size: 14px;
-    }
-    .win95-button:active {
-        border-color: #808080 #fff #fff #808080;
-    }
-</style>
 {% endblock %}
