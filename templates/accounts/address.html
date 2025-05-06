@@ -1,0 +1,57 @@
+{% extends 'base/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Địa chỉ giao hàng{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Tài khoản của tôi</h5>
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'accounts:profile' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-user me-2"></i> Thông tin tài khoản
+                        </a>
+                        <a href="{% url 'accounts:orders' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-shopping-bag me-2"></i> Đơn hàng của tôi
+                        </a>
+                        <a href="{% url 'accounts:address' %}" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-map-marker-alt me-2"></i> Địa chỉ giao hàng
+                        </a>
+                        <a href="{% url 'accounts:edit_profile' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-cog me-2"></i> Cập nhật tài khoản
+                        </a>
+                        <a href="{% url 'accounts:password_reset' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-lock me-2"></i> Đổi mật khẩu
+                        </a>
+                        <a href="{% url 'accounts:logout' %}" class="list-group-item list-group-item-action text-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Địa chỉ giao hàng</h5>
+                    
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-dark">Lưu địa chỉ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

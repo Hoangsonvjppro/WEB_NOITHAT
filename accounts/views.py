@@ -45,8 +45,13 @@ def register_view(request):
         if form.is_valid():
             with transaction.atomic():
                 user = form.save()
-                CustomerProfile.objects.create(user=user)
-                login(request, user)
+                # Check if CustomerProfile already exists for this user
+                profile, created = CustomerProfile.objects.get_or_create(user=user)
+                
+                # Authenticate the user before login
+                authenticated_user = authenticate(request, username=user.email, password=form.cleaned_data['password1'])
+                login(request, authenticated_user)
+                
                 messages.success(request, 'Đăng ký tài khoản thành công!')
                 return redirect('home')
     else:
