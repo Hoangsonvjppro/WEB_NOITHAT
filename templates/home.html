@@ -1,0 +1,237 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Nội Thất Cao Cấp - Trang chủ{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <div class="container-fluid p-0 mb-5">
+        <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="https://placehold.co/1200x400?text=Không+gian+phòng+khách" class="d-block w-100" alt="Slide 1">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h2>Không gian phòng khách đẳng cấp</h2>
+                        <p>Khám phá bộ sưu tập nội thất phòng khách mới nhất của chúng tôi</p>
+                        <a href="#" class="btn btn-light">Xem ngay</a>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://placehold.co/1200x400?text=Phòng+ngủ+cao+cấp" class="d-block w-100" alt="Slide 2">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h2>Phòng ngủ cao cấp</h2>
+                        <p>Tận hưởng giấc ngủ ngon với bộ sưu tập nội thất phòng ngủ</p>
+                        <a href="#" class="btn btn-light">Khám phá</a>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <img src="https://placehold.co/1200x400?text=Không+gian+làm+việc" class="d-block w-100" alt="Slide 3">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h2>Không gian làm việc hiện đại</h2>
+                        <p>Nâng cao hiệu suất với bộ sưu tập nội thất văn phòng thiết kế tinh tế</p>
+                        <a href="#" class="btn btn-light">Tìm hiểu thêm</a>
+                    </div>
+                </div>
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Featured Categories -->
+    <div class="container mb-5">
+        <h2 class="text-center mb-4">Danh mục nổi bật</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="https://placehold.co/600x400?text=Phòng+khách" class="card-img-top" alt="Phòng khách">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Phòng khách</h5>
+                        <a href="#" class="btn btn-outline-dark">Xem thêm</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="https://placehold.co/600x400?text=Phòng+ngủ" class="card-img-top" alt="Phòng ngủ">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Phòng ngủ</h5>
+                        <a href="#" class="btn btn-outline-dark">Xem thêm</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <img src="https://placehold.co/600x400?text=Phòng+ăn" class="card-img-top" alt="Phòng ăn">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Phòng ăn</h5>
+                        <a href="#" class="btn btn-outline-dark">Xem thêm</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Featured Products -->
+    <div class="container mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Sản phẩm nổi bật</h2>
+            <a href="#" class="btn btn-outline-dark">Xem tất cả</a>
+        </div>
+        
+        <div class="row g-4">
+            {% for i in "12345678"|make_list %}
+            <div class="col-md-3">
+                <div class="card h-100">
+                    <div class="position-relative">
+                        <img src="https://placehold.co/300x300?text=Sản+phẩm+{{ i }}" class="card-img-top" alt="Product">
+                        <span class="position-absolute top-0 start-0 badge bg-danger m-2">Giảm 20%</span>
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <button class="btn btn-sm btn-outline-light rounded-circle">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">Sản phẩm {{ i }}</h5>
+                        <p class="card-text text-muted">Mô tả ngắn về sản phẩm {{ i }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="text-danger fw-bold">2.800.000₫</span>
+                                <span class="text-muted text-decoration-line-through ms-2">3.500.000₫</span>
+                            </div>
+                            <div class="text-warning">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                        <div class="d-grid">
+                            <button class="btn btn-outline-dark">
+                                <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Benefits Section -->
+    <div class="container mb-5">
+        <div class="row g-4 text-center">
+            <div class="col-md-3">
+                <div class="p-4 border rounded h-100">
+                    <i class="fas fa-truck fa-3x mb-3 text-primary"></i>
+                    <h5>Vận chuyển miễn phí</h5>
+                    <p class="text-muted mb-0">Cho đơn hàng từ 5 triệu đồng</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-4 border rounded h-100">
+                    <i class="fas fa-sync-alt fa-3x mb-3 text-primary"></i>
+                    <h5>Đổi trả trong 30 ngày</h5>
+                    <p class="text-muted mb-0">Nếu sản phẩm có lỗi</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-4 border rounded h-100">
+                    <i class="fas fa-shield-alt fa-3x mb-3 text-primary"></i>
+                    <h5>Bảo hành 12 tháng</h5>
+                    <p class="text-muted mb-0">Cho tất cả sản phẩm</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-4 border rounded h-100">
+                    <i class="fas fa-headset fa-3x mb-3 text-primary"></i>
+                    <h5>Hỗ trợ 24/7</h5>
+                    <p class="text-muted mb-0">Tư vấn trực tuyến</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Testimonials -->
+    <div class="container mb-5">
+        <h2 class="text-center mb-4">Khách hàng nói gì về chúng tôi</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://placehold.co/50?text=Avatar" class="rounded-circle me-3" alt="Avatar">
+                            <div>
+                                <h6 class="mb-0">Nguyễn Văn A</h6>
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="card-text">"Tôi rất hài lòng với chất lượng sản phẩm và dịch vụ của Nội Thất Cao Cấp. Sofa tôi mua đã được sử dụng hơn 2 năm và vẫn còn rất đẹp."</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://placehold.co/50?text=Avatar" class="rounded-circle me-3" alt="Avatar">
+                            <div>
+                                <h6 class="mb-0">Trần Thị B</h6>
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="card-text">"Dịch vụ giao hàng nhanh chóng và nhân viên lắp đặt chuyên nghiệp. Bàn ăn tôi mua có chất lượng tốt, đúng như mô tả trên website."</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://placehold.co/50?text=Avatar" class="rounded-circle me-3" alt="Avatar">
+                            <div>
+                                <h6 class="mb-0">Lê Văn C</h6>
+                                <div class="text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="card-text">"Tôi đã mua toàn bộ nội thất cho căn hộ mới của mình từ Nội Thất Cao Cấp. Họ có nhiều mẫu mã đẹp và giá cả hợp lý. Tôi rất hài lòng!"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

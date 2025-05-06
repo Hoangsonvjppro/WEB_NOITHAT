@@ -1,0 +1,316 @@
+{% extends 'base/base.html' %}
+
+{% block title %}
+    {% if current_category %}
+        {{ current_category.name }} - Nội Thất Cao Cấp
+    {% else %}
+        Tất cả sản phẩm - Nội Thất Cao Cấp
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Sidebar Filters -->
+            <div class="col-md-3 mb-4">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">Bộ lọc sản phẩm</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get">
+                            <!-- Categories -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Danh mục</h6>
+                                <ul class="list-unstyled">
+                                    <li>
+                                        <a href="{% url 'products:product_list' %}" class="text-decoration-none 
+                                            {% if not current_category %}fw-bold text-dark{% endif %}">
+                                            Tất cả sản phẩm
+                                        </a>
+                                    </li>
+                                    {% for category in categories %}
+                                        <li class="mt-2">
+                                            <a href="{% url 'products:category_products' category.slug %}" 
+                                               class="text-decoration-none {% if current_category == category %}fw-bold text-dark{% endif %}">
+                                                {{ category.name }}
+                                            </a>
+                                            
+                                            <!-- Display subcategories if this is a parent category -->
+                                            {% if category.children.all %}
+                                                <ul class="list-unstyled ms-3 mt-1">
+                                                    {% for child in category.children.all %}
+                                                        <li class="mt-1">
+                                                            <a href="{% url 'products:category_products' child.slug %}" 
+                                                               class="text-decoration-none {% if current_category == child %}fw-bold text-dark{% endif %}">
+                                                                {{ child.name }}
+                                                            </a>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            
+                            <!-- Price Range -->
+                            <div class="mb-4">
+                                <h6 class="fw-bold">Khoảng giá</h6>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <input type="number" name="min_price" class="form-control form-control-sm" 
+                                               placeholder="Từ" value="{{ request.GET.min_price }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number" name="max_price" class="form-control form-control-sm" 
+                                               placeholder="Đến" value="{{ request.GET.max_price }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Material -->
+                            {% if materials %}
+                                <div class="mb-4">
+                                    <h6 class="fw-bold">Chất liệu</h6>
+                                    {% for material in materials %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="material" 
+                                                   id="material{{ forloop.counter }}" value="{{ material }}"
+                                                   {% if request.GET.material == material %}checked{% endif %}>
+                                            <label class="form-check-label" for="material{{ forloop.counter }}">
+                                                {{ material }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Color -->
+                            {% if colors %}
+                                <div class="mb-4">
+                                    <h6 class="fw-bold">Màu sắc</h6>
+                                    {% for color in colors %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="color" 
+                                                   id="color{{ forloop.counter }}" value="{{ color }}"
+                                                   {% if request.GET.color == color %}checked{% endif %}>
+                                            <label class="form-check-label" for="color{{ forloop.counter }}">
+                                                {{ color }}
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Apply/Reset filters -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-dark">Áp dụng</button>
+                                <a href="{% if current_category %}
+                                            {% url 'products:category_products' current_category.slug %}
+                                        {% else %}
+                                            {% url 'products:product_list' %}
+                                        {% endif %}" 
+                                   class="btn btn-outline-secondary">
+                                    Đặt lại
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Product List -->
+            <div class="col-md-9">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2>
+                            {% if current_category %}
+                                {{ current_category.name }}
+                            {% else %}
+                                Tất cả sản phẩm
+                            {% endif %}
+                        </h2>
+                        <p class="text-muted">Hiển thị {{ products|length }} sản phẩm</p>
+                    </div>
+                    
+                    <!-- Sort options -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-dark dropdown-toggle" type="button" 
+                                id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if request.GET.sort == 'price_asc' %}
+                                Giá: Thấp đến cao
+                            {% elif request.GET.sort == 'price_desc' %}
+                                Giá: Cao đến thấp
+                            {% elif request.GET.sort == 'newest' %}
+                                Mới nhất
+                            {% elif request.GET.sort == 'name_asc' %}
+                                Tên: A-Z
+                            {% else %}
+                                Sắp xếp theo
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                            <li>
+                                <a class="dropdown-item" href="?{% if request.GET %}
+                                    {% for key, value in request.GET.items %}
+                                        {% if key != 'sort' and key != 'page' %}{{ key }}={{ value }}&{% endif %}
+                                    {% endfor %}
+                                {% endif %}sort=newest">Mới nhất</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="?{% if request.GET %}
+                                    {% for key, value in request.GET.items %}
+                                        {% if key != 'sort' and key != 'page' %}{{ key }}={{ value }}&{% endif %}
+                                    {% endfor %}
+                                {% endif %}sort=price_asc">Giá: Thấp đến cao</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="?{% if request.GET %}
+                                    {% for key, value in request.GET.items %}
+                                        {% if key != 'sort' and key != 'page' %}{{ key }}={{ value }}&{% endif %}
+                                    {% endfor %}
+                                {% endif %}sort=price_desc">Giá: Cao đến thấp</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="?{% if request.GET %}
+                                    {% for key, value in request.GET.items %}
+                                        {% if key != 'sort' and key != 'page' %}{{ key }}={{ value }}&{% endif %}
+                                    {% endfor %}
+                                {% endif %}sort=name_asc">Tên: A-Z</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <!-- Product Grid -->
+                <div class="row g-4">
+                    {% for product in products %}
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100">
+                                <div class="position-relative">
+                                    {% if product.images.filter.exists %}
+                                        <img src="{{ product.images.first.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                                    {% else %}
+                                        <img src="https://placehold.co/300x300?text=Không+có+ảnh" class="card-img-top" alt="{{ product.name }}">
+                                    {% endif %}
+                                    
+                                    {% if product.discount_percentage > 0 %}
+                                        <span class="position-absolute top-0 start-0 badge bg-danger m-2">Giảm {{ product.discount_percentage }}%</span>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                    <p class="card-text text-muted small">{{ product.description|truncatechars:60 }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <span class="{% if product.discount_price %}text-danger fw-bold{% endif %}">{{ product.current_price|floatformat:0 }} ₫</span>
+                                            {% if product.discount_price %}
+                                                <span class="text-muted text-decoration-line-through ms-2">{{ product.price|floatformat:0 }} ₫</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-warning">
+                                            {% for i in '12345'|make_list %}
+                                                {% if forloop.counter <= product.average_rating %}
+                                                    <i class="fas fa-star"></i>
+                                                {% elif forloop.counter <= product.average_rating|add:'0.5' %}
+                                                    <i class="fas fa-star-half-alt"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-white border-top-0 d-flex justify-content-between">
+                                    <a href="{% url 'products:product_detail' product.slug %}" class="btn btn-sm btn-outline-dark">
+                                        <i class="fas fa-eye me-1"></i>Chi tiết
+                                    </a>
+                                    <form method="post" action="{% url 'cart:add_to_cart' product.id %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-sm btn-dark">
+                                            <i class="fas fa-shopping-cart me-1"></i>Thêm vào giỏ
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 text-center py-5">
+                            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                            <h4>Không tìm thấy sản phẩm nào</h4>
+                            <p class="text-muted">Vui lòng thử lại với các bộ lọc khác hoặc xem tất cả sản phẩm của chúng tôi.</p>
+                            <a href="{% url 'products:product_list' %}" class="btn btn-outline-dark mt-2">Xem tất cả sản phẩm</a>
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Pagination -->
+                {% if is_paginated %}
+                    <nav aria-label="Page navigation" class="mt-5">
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET %}
+                                        {% for key, value in request.GET.items %}
+                                            {% if key != 'page' %}{{ key }}={{ value }}&{% endif %}
+                                        {% endfor %}
+                                    {% endif %}page=1" aria-label="First">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET %}
+                                        {% for key, value in request.GET.items %}
+                                            {% if key != 'page' %}{{ key }}={{ value }}&{% endif %}
+                                        {% endfor %}
+                                    {% endif %}page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?{% if request.GET %}
+                                            {% for key, value in request.GET.items %}
+                                                {% if key != 'page' %}{{ key }}={{ value }}&{% endif %}
+                                            {% endfor %}
+                                        {% endif %}page={{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET %}
+                                        {% for key, value in request.GET.items %}
+                                            {% if key != 'page' %}{{ key }}={{ value }}&{% endif %}
+                                        {% endfor %}
+                                    {% endif %}page={{ page_obj.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET %}
+                                        {% for key, value in request.GET.items %}
+                                            {% if key != 'page' %}{{ key }}={{ value }}&{% endif %}
+                                        {% endfor %}
+                                    {% endif %}page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %} 

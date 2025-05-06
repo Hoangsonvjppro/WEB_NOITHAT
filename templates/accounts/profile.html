@@ -1,0 +1,120 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Tài khoản của tôi{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Tài khoản của tôi</h5>
+                    <div class="list-group list-group-flush">
+                        <a href="{% url 'accounts:profile' %}" class="list-group-item list-group-item-action active">
+                            <i class="fas fa-user me-2"></i> Thông tin tài khoản
+                        </a>
+                        <a href="{% url 'accounts:orders' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-shopping-bag me-2"></i> Đơn hàng của tôi
+                        </a>
+                        <a href="{% url 'accounts:address' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-map-marker-alt me-2"></i> Địa chỉ giao hàng
+                        </a>
+                        <a href="{% url 'accounts:edit_profile' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-cog me-2"></i> Cập nhật tài khoản
+                        </a>
+                        <a href="{% url 'accounts:password_reset' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-lock me-2"></i> Đổi mật khẩu
+                        </a>
+                        <a href="{% url 'accounts:logout' %}" class="list-group-item list-group-item-action text-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- User Info -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Thông tin tài khoản</h5>
+                        <a href="{% url 'accounts:edit_profile' %}" class="btn btn-sm btn-outline-dark">
+                            <i class="fas fa-edit me-1"></i> Cập nhật
+                        </a>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Họ tên:</strong> {{ user.get_full_name }}</p>
+                            <p><strong>Email:</strong> {{ user.email }}</p>
+                            <p><strong>Số điện thoại:</strong> {{ user.phone_number|default:"Chưa cập nhật" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            {% if user.customer_profile %}
+                                <p><strong>Ngày sinh:</strong> {{ user.customer_profile.birth_date|date:"d/m/Y"|default:"Chưa cập nhật" }}</p>
+                                <p><strong>Địa chỉ:</strong> {{ user.customer_profile.address|default:"Chưa cập nhật" }}</p>
+                            {% else %}
+                                <p><strong>Ngày sinh:</strong> Chưa cập nhật</p>
+                                <p><strong>Địa chỉ:</strong> Chưa cập nhật</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Orders -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Đơn hàng gần đây</h5>
+                        <a href="{% url 'accounts:orders' %}" class="btn btn-sm btn-outline-dark">
+                            Xem tất cả
+                        </a>
+                    </div>
+                    
+                    {% if recent_orders %}
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã đơn hàng</th>
+                                        <th>Ngày đặt</th>
+                                        <th>Trạng thái</th>
+                                        <th>Tổng tiền</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for order in recent_orders %}
+                                        <tr>
+                                            <td>{{ order.order_id }}</td>
+                                            <td>{{ order.created_at|date:"d/m/Y" }}</td>
+                                            <td>
+                                                <span class="badge {% if order.status == 'pending' %}bg-warning{% elif order.status == 'completed' %}bg-success{% elif order.status == 'cancelled' %}bg-danger{% else %}bg-info{% endif %}">
+                                                    {{ order.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td>{{ order.total_price|floatformat:0|intcomma }} ₫</td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-outline-dark">Chi tiết</a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <p>Bạn chưa có đơn hàng nào.</p>
+                            <a href="{% url 'products:list' %}" class="btn btn-dark">Mua sắm ngay</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,181 @@
+{% extends 'base/base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Thanh toán - Nội Thất Cao Cấp{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h2 class="mb-4">Thanh toán</h2>
+            
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <!-- Shipping Information -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Thông tin giao hàng</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label for="{{ form.shipping_name.id_for_label }}" class="form-label">{{ form.shipping_name.label }} <span class="text-danger">*</span></label>
+                                {% render_field form.shipping_name class="form-control" placeholder=form.shipping_name.help_text %}
+                                {% if form.shipping_name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.shipping_name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.shipping_email.id_for_label }}" class="form-label">{{ form.shipping_email.label }} <span class="text-danger">*</span></label>
+                                {% render_field form.shipping_email class="form-control" placeholder=form.shipping_email.help_text %}
+                                {% if form.shipping_email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.shipping_email.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.shipping_phone.id_for_label }}" class="form-label">{{ form.shipping_phone.label }} <span class="text-danger">*</span></label>
+                                {% render_field form.shipping_phone class="form-control" placeholder=form.shipping_phone.help_text %}
+                                {% if form.shipping_phone.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.shipping_phone.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <label for="{{ form.shipping_address.id_for_label }}" class="form-label">{{ form.shipping_address.label }} <span class="text-danger">*</span></label>
+                                {% render_field form.shipping_address class="form-control" placeholder=form.shipping_address.help_text rows="3" %}
+                                {% if form.shipping_address.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.shipping_address.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <label for="{{ form.notes.id_for_label }}" class="form-label">{{ form.notes.label }}</label>
+                                {% render_field form.notes class="form-control" placeholder=form.notes.help_text rows="3" %}
+                                {% if form.notes.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.notes.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Payment Method -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">Phương thức thanh toán</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for choice in form.payment_method %}
+                            <div class="form-check mb-3">
+                                {{ choice.tag }}
+                                <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                    {{ choice.choice_label }}
+                                </label>
+                                
+                                {% if choice.choice_value == 'cod' %}
+                                    <small class="text-muted d-block ms-4">Thanh toán khi nhận hàng. Quý khách vui lòng kiểm tra đơn hàng khi nhận hàng.</small>
+                                {% elif choice.choice_value == 'bank_transfer' %}
+                                    <small class="text-muted d-block ms-4">Chuyển khoản ngân hàng. Chúng tôi sẽ gửi thông tin tài khoản qua email sau khi đặt hàng.</small>
+                                {% elif choice.choice_value == 'credit_card' %}
+                                    <small class="text-muted d-block ms-4">Thanh toán trực tuyến bằng thẻ tín dụng/ghi nợ.</small>
+                                {% elif choice.choice_value == 'momo' %}
+                                    <small class="text-muted d-block ms-4">Thanh toán qua ví điện tử MoMo.</small>
+                                {% elif choice.choice_value == 'zalopay' %}
+                                    <small class="text-muted d-block ms-4">Thanh toán qua ví điện tử ZaloPay.</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                        
+                        {% if form.payment_method.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.payment_method.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            
+        </div>
+        
+        <!-- Order Summary -->
+        <div class="col-md-4">
+            <div class="card mb-4 sticky-top" style="top: 20px;">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">Tóm tắt đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Order Items -->
+                    <div class="mb-3">
+                        {% for item in cart.items.all %}
+                            <div class="d-flex justify-content-between mb-2">
+                                <div>
+                                    <span>{{ item.product.name }}</span>
+                                    <span class="text-muted d-block">x {{ item.quantity }}</span>
+                                </div>
+                                <span>{{ item.total_price|floatformat:0 }} ₫</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Order Totals -->
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tạm tính</span>
+                        <span>{{ cart.total_price|floatformat:0 }} ₫</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Phí vận chuyển</span>
+                        <span>Miễn phí</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Giảm giá</span>
+                        <span>0 ₫</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between mb-4">
+                        <strong>Tổng cộng</strong>
+                        <strong>{{ cart.total_price|floatformat:0 }} ₫</strong>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-dark btn-lg">
+                            <i class="fas fa-check me-2"></i>Xác nhận đặt hàng
+                        </button>
+                        <a href="{% url 'cart:cart_detail' %}" class="btn btn-outline-dark">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại giỏ hàng
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+    </div>
+</div>
+{% endblock %} 
