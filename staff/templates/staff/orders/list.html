@@ -1,0 +1,227 @@
+{% extends 'staff/base_staff.html' %}
+
+{% block title %}Quản lý Đơn hàng{% endblock %}
+
+{% block page_title %}Danh sách Đơn hàng{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item active">Đơn hàng</li>
+{% endblock %}
+
+{% block content %}
+<div class="card border-0 dashboard-card mb-4">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Lọc đơn hàng</h5>
+        <a href="{% url 'staff:new_order' %}" class="btn btn-primary">
+            <i class="fas fa-plus-circle me-2"></i> Tạo đơn hàng mới
+        </a>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row">
+            <div class="col-md-3 mb-3">
+                <label for="status" class="form-label">Trạng thái</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="" {% if not status %}selected{% endif %}>Tất cả</option>
+                    <option value="pending" {% if status == 'pending' %}selected{% endif %}>Đang chờ</option>
+                    <option value="processing" {% if status == 'processing' %}selected{% endif %}>Đang xử lý</option>
+                    <option value="shipped" {% if status == 'shipped' %}selected{% endif %}>Đang giao</option>
+                    <option value="delivered" {% if status == 'delivered' %}selected{% endif %}>Đã giao</option>
+                    <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>Đã hủy</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="payment_status" class="form-label">Thanh toán</label>
+                <select class="form-select" id="payment_status" name="payment_status">
+                    <option value="" {% if not payment_status %}selected{% endif %}>Tất cả</option>
+                    <option value="pending" {% if payment_status == 'pending' %}selected{% endif %}>Chưa thanh toán</option>
+                    <option value="paid" {% if payment_status == 'paid' %}selected{% endif %}>Đã thanh toán</option>
+                    <option value="failed" {% if payment_status == 'failed' %}selected{% endif %}>Thanh toán thất bại</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="date_from" class="form-label">Từ ngày</label>
+                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ date_from|default:'' }}">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="date_to" class="form-label">Đến ngày</label>
+                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ date_to|default:'' }}">
+            </div>
+            <div class="col-12 text-end">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter me-2"></i> Lọc
+                </button>
+                <a href="{% url 'staff:orders' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i> Xóa bộ lọc
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card border-0 dashboard-card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Danh sách đơn hàng</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Nhân viên</th>
+                        <th>Trạng thái</th>
+                        <th>Thanh toán</th>
+                        <th>Tổng tiền</th>
+                        <th>Ngày tạo</th>
+                        <th class="text-end">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.order_number }}</td>
+                        <td>{{ order.customer.get_full_name }}</td>
+                        <td>{% if order.sales_staff %}{{ order.sales_staff.get_full_name }}{% else %}<span class="text-muted">N/A</span>{% endif %}</td>
+                        <td>
+                            {% if order.status == 'pending' %}
+                            <span class="badge bg-warning">Đang chờ</span>
+                            {% elif order.status == 'processing' %}
+                            <span class="badge bg-info">Đang xử lý</span>
+                            {% elif order.status == 'shipped' %}
+                            <span class="badge bg-primary">Đang giao</span>
+                            {% elif order.status == 'delivered' %}
+                            <span class="badge bg-success">Đã giao</span>
+                            {% elif order.status == 'cancelled' %}
+                            <span class="badge bg-danger">Đã hủy</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if order.payment_status == 'pending' %}
+                            <span class="badge bg-warning">Chưa thanh toán</span>
+                            {% elif order.payment_status == 'paid' %}
+                            <span class="badge bg-success">Đã thanh toán</span>
+                            {% elif order.payment_status == 'failed' %}
+                            <span class="badge bg-danger">Thanh toán thất bại</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ order.total_amount|floatformat:0 }}đ</td>
+                        <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                        <td class="text-end">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'staff:order_detail' order.id %}" class="btn btn-outline-secondary" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'staff:order_update' order.id %}" class="btn btn-outline-primary" title="Cập nhật">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if order.status == 'pending' or order.status == 'processing' %}
+                                <a href="{% url 'staff:process_shipment' order.id %}" class="btn btn-outline-success" title="Xử lý giao hàng">
+                                    <i class="fas fa-shipping-fast"></i>
+                                </a>
+                                {% endif %}
+                                {% if order.status != 'cancelled' and order.status != 'delivered' %}
+                                <button type="button" class="btn btn-outline-danger" title="Hủy đơn hàng" data-bs-toggle="modal" data-bs-target="#cancelOrderModal{{ order.id }}">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                {% endif %}
+                                <a href="{% url 'staff:generate_invoice' order.id %}" class="btn btn-outline-info" title="In hóa đơn">
+                                    <i class="fas fa-file-invoice"></i>
+                                </a>
+                            </div>
+                            
+                            <!-- Cancel Order Modal -->
+                            <div class="modal fade" id="cancelOrderModal{{ order.id }}" tabindex="-1" aria-labelledby="cancelOrderModalLabel{{ order.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="cancelOrderModalLabel{{ order.id }}">Xác nhận hủy đơn hàng</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p>Bạn có chắc chắn muốn hủy đơn hàng <strong>#{{ order.order_number }}</strong>?</p>
+                                            <p>Hành động này không thể hoàn tác.</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                            <form method="post" action="{% url 'staff:order_update' order.id %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="status" value="cancelled">
+                                                <button type="submit" class="btn btn-danger">Xác nhận hủy</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <p class="text-muted mb-0">Không tìm thấy đơn hàng nào.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if orders.paginator.num_pages > 1 %}
+    <div class="card-footer bg-white">
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center mb-0">
+                {% if orders.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="First">
+                        <span aria-hidden="true">&laquo;&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ orders.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;&laquo;</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %}
+                
+                {% for i in orders.paginator.page_range %}
+                    {% if orders.number == i %}
+                    <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                    {% elif i > orders.number|add:'-3' and i < orders.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if orders.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ orders.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ orders.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="Last">
+                        <span aria-hidden="true">&raquo;&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %} 

@@ -1,0 +1,287 @@
+{% extends 'staff/base_staff.html' %}
+
+{% block title %}Quản lý Chi nhánh - Dashboard{% endblock %}
+
+{% block page_title %}Quản lý Chi nhánh{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item active">Quản lý Chi nhánh</li>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-6 mb-4">
+        <div class="card border-0 dashboard-card h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Thông tin Chi nhánh</h5>
+                <a href="{% url 'staff:branch_edit' branch.id %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-edit"></i> Chỉnh sửa
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2 text-center">
+                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white mb-3" style="width: 80px; height: 80px; margin: 0 auto;">
+                            <i class="fas fa-store fa-2x"></i>
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <h4>{{ branch.name }}</h4>
+                        <p class="text-muted mb-1">
+                            <i class="fas fa-map-marker-alt me-2"></i> {{ branch.address }}, {{ branch.city }}
+                        </p>
+                        <p class="text-muted mb-1">
+                            <i class="fas fa-phone me-2"></i> {{ branch.phone }}
+                        </p>
+                        <p class="text-muted mb-1">
+                            <i class="fas fa-envelope me-2"></i> {{ branch.email }}
+                        </p>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-calendar-check me-2"></i> Ngày khai trương: {{ branch.opening_date|date:"d/m/Y" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="row h-100">
+            <div class="col-sm-6 mb-4 mb-sm-0">
+                <div class="card h-100 border-0 dashboard-card bg-success bg-gradient text-white">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="card-icon me-3">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            <h6 class="card-subtitle mb-1 opacity-75">Nhân viên</h6>
+                            <h2 class="card-title mb-0">{{ staff_count }}</h2>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="{% url 'staff:staff_members' %}" class="text-white">Xem chi tiết <i class="fas fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-sm-6">
+                <div class="card h-100 border-0 dashboard-card bg-primary bg-gradient text-white">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="card-icon me-3">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div>
+                            <h6 class="card-subtitle mb-1 opacity-75">Đơn hàng</h6>
+                            <h2 class="card-title mb-0">{{ branch_orders_count }}</h2>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="{% url 'staff:orders' %}" class="text-white">Xem chi tiết <i class="fas fa-arrow-right ms-1"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 dashboard-card h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Hiệu suất Chi nhánh</h5>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="performanceDropdown" data-bs-toggle="dropdown">
+                        Tháng này
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="performanceDropdown">
+                        <li><a class="dropdown-item" href="#">Tháng này</a></li>
+                        <li><a class="dropdown-item" href="#">Quý này</a></li>
+                        <li><a class="dropdown-item" href="#">Năm nay</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row text-center mb-4">
+                    <div class="col-4">
+                        <h3 class="text-success">{{ branch_revenue|floatformat:0 }}đ</h3>
+                        <p class="text-muted mb-0">Doanh thu</p>
+                    </div>
+                    <div class="col-4">
+                        <h3>{{ branch_orders_count }}</h3>
+                        <p class="text-muted mb-0">Đơn hàng</p>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="text-info">{{ completion_rate }}%</h3>
+                        <p class="text-muted mb-0">Tỷ lệ hoàn thành</p>
+                    </div>
+                </div>
+                
+                <canvas id="branchPerformanceChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6 mb-4">
+        <div class="card border-0 dashboard-card h-100">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Nhân viên chi nhánh</h5>
+                <a href="{% url 'staff:staff_members' %}" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Nhân viên</th>
+                                <th>Chức vụ</th>
+                                <th>Ngày vào làm</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for staff in branch_staff %}
+                            <tr>
+                                <td class="d-flex align-items-center">
+                                    <img src="{{ staff.user.profile_pic.url|default:'/static/images/default-avatar.png' }}" class="rounded-circle me-2" width="32" height="32">
+                                    {{ staff.user.get_full_name }}
+                                </td>
+                                <td>{{ staff.get_role_display }}</td>
+                                <td>{{ staff.hire_date|date:"d/m/Y" }}</td>
+                                <td>
+                                    {% if staff.is_active %}
+                                    <span class="badge bg-success">Đang làm việc</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Không hoạt động</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'staff:staff_detail' staff.id %}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-3">Không có nhân viên nào.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card border-0 dashboard-card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Đơn hàng gần đây</h5>
+                <a href="{% url 'staff:orders' %}" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn</th>
+                                <th>Khách hàng</th>
+                                <th>Nhân viên</th>
+                                <th>Trạng thái</th>
+                                <th>Tổng tiền</th>
+                                <th>Ngày tạo</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in branch_orders %}
+                            <tr>
+                                <td>{{ order.order_number }}</td>
+                                <td>{{ order.customer.get_full_name }}</td>
+                                <td>{% if order.sales_staff %}{{ order.sales_staff.get_full_name }}{% else %}<span class="text-muted">N/A</span>{% endif %}</td>
+                                <td>
+                                    {% if order.status == 'pending' %}
+                                    <span class="badge bg-warning">Đang chờ</span>
+                                    {% elif order.status == 'processing' %}
+                                    <span class="badge bg-info">Đang xử lý</span>
+                                    {% elif order.status == 'shipped' %}
+                                    <span class="badge bg-primary">Đang giao</span>
+                                    {% elif order.status == 'delivered' %}
+                                    <span class="badge bg-success">Đã giao</span>
+                                    {% elif order.status == 'cancelled' %}
+                                    <span class="badge bg-danger">Đã hủy</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.total_amount|floatformat:0 }}đ</td>
+                                <td>{{ order.created_at|date:"d/m/Y H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'staff:order_detail' order.id %}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-3">Không có đơn hàng nào.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Branch Performance Chart
+        const branchPerformanceCtx = document.getElementById('branchPerformanceChart').getContext('2d');
+        const branchPerformanceChart = new Chart(branchPerformanceCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'],
+                datasets: [{
+                    label: 'Doanh thu (triệu đồng)',
+                    data: [12, 19, 15, 22],
+                    backgroundColor: '#3f51b5',
+                    barThickness: 25,
+                    borderRadius: 5
+                }, {
+                    label: 'Số đơn hàng',
+                    data: [15, 22, 18, 26],
+                    backgroundColor: '#f50057',
+                    barThickness: 25,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 
