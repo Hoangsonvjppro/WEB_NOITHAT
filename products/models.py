@@ -60,14 +60,22 @@ class Product(models.Model):
         return self.name
     
     def save(self, *args, **kwargs):
+        creating = self._state.adding  # Check if this is a new object
+        
+        # Generate slug if not provided
         if not self.slug:
             self.slug = slugify(self.name)
-        if not self.sku:
-            self.sku = f"P{self.id:07d}" if self.id else None
-        super().save(*args, **kwargs)
-        if not self.sku:
+            
+        # Save first to get ID if this is a new product and we need to generate SKU
+        if creating and not self.sku:
+            super().save(*args, **kwargs)
             self.sku = f"P{self.id:07d}"
-            self.save(update_fields=['sku'])
+            kwargs['force_insert'] = False  # Since we already inserted
+            kwargs['update_fields'] = ['sku']  # Only update the SKU field
+            super().save(*args, **kwargs)
+            return
+            
+        super().save(*args, **kwargs)
     
     @property
     def current_price(self):

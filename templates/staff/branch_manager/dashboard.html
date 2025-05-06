@@ -1,0 +1,299 @@
+{% extends 'base/staff_base.html' %}
+
+{% block title %}Quản Lý Chi Nhánh{% endblock %}
+
+{% block sidebar %}
+    {% include 'staff/dashboard/sidebar.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Quản Lý Chi Nhánh {{ branch.name }}</h1>
+        <button class="btn btn-primary">
+            <i class="fas fa-download me-1"></i> Xuất báo cáo
+        </button>
+    </div>
+    
+    <!-- Branch Statistics -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Doanh thu tháng này</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ branch_revenue|floatformat:0|default:"0" }} VNĐ</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Tổng đơn hàng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ branch_orders_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Tỷ lệ hoàn thành đơn hàng</div>
+                            <div class="row no-gutters align-items-center">
+                                <div class="col-auto">
+                                    <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{ completion_rate|default:"0" }}%</div>
+                                </div>
+                                <div class="col">
+                                    <div class="progress progress-sm mr-2">
+                                        <div class="progress-bar bg-info" role="progressbar" 
+                                             style="width: {{ completion_rate|default:'0' }}%" 
+                                             aria-valuenow="{{ completion_rate|default:'0' }}" 
+                                             aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Tổng nhân viên</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ staff_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Branch Information -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Thông tin chi nhánh</h6>
+                    <a href="{% url 'staff:branch_edit' branch.id %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i> Chỉnh sửa
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-lg-4 font-weight-bold">Tên chi nhánh:</div>
+                        <div class="col-lg-8">{{ branch.name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-lg-4 font-weight-bold">Địa chỉ:</div>
+                        <div class="col-lg-8">{{ branch.address }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-lg-4 font-weight-bold">Số điện thoại:</div>
+                        <div class="col-lg-8">{{ branch.phone }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-lg-4 font-weight-bold">Email:</div>
+                        <div class="col-lg-8">{{ branch.email }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-lg-4 font-weight-bold">Quản lý:</div>
+                        <div class="col-lg-8">{{ branch.manager.get_full_name }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-lg-4 font-weight-bold">Kho:</div>
+                        <div class="col-lg-8">{{ branch.warehouse.name }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Hiệu suất theo tháng</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="branchPerformanceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Staff and Orders -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Nhân viên chi nhánh</h6>
+                    <a href="{% url 'staff:staff_members' %}" class="btn btn-sm btn-primary">
+                        Xem tất cả
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Mã NV</th>
+                                    <th>Tên</th>
+                                    <th>Chức vụ</th>
+                                    <th>Ngày vào làm</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for staff in branch_staff %}
+                                <tr>
+                                    <td>{{ staff.employee_id }}</td>
+                                    <td>{{ staff.user.get_full_name }}</td>
+                                    <td>{{ staff.user.get_role_display }}</td>
+                                    <td>{{ staff.hire_date|date:"d/m/Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">Không có nhân viên nào</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Đơn hàng gần đây</h6>
+                    <a href="{% url 'staff:orders' %}" class="btn btn-sm btn-primary">
+                        Xem tất cả
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th>Ngày đặt</th>
+                                    <th>Trạng thái</th>
+                                    <th>Tổng tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in branch_orders %}
+                                <tr>
+                                    <td>{{ order.order_number }}</td>
+                                    <td>{{ order.shipping_name }}</td>
+                                    <td>{{ order.created_at|date:"d/m/Y" }}</td>
+                                    <td>
+                                        {% if order.status == 'pending' %}
+                                            <span class="badge bg-warning">Chờ xác nhận</span>
+                                        {% elif order.status == 'processing' %}
+                                            <span class="badge bg-info">Đang xử lý</span>
+                                        {% elif order.status == 'shipped' %}
+                                            <span class="badge bg-primary">Đang giao hàng</span>
+                                        {% elif order.status == 'delivered' %}
+                                            <span class="badge bg-success">Đã giao hàng</span>
+                                        {% elif order.status == 'cancelled' %}
+                                            <span class="badge bg-danger">Đã hủy</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ order.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ order.total_amount|floatformat:0 }} VNĐ</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center">Không có đơn hàng nào gần đây</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Branch Performance Chart
+    document.addEventListener('DOMContentLoaded', function() {
+        var ctx = document.getElementById('branchPerformanceChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
+                datasets: [
+                    {
+                        label: 'Doanh thu (triệu VNĐ)',
+                        data: [12, 19, 15, 17, 14, 18, 20, 25, 23, 25, 27, 30],
+                        backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                        borderColor: 'rgba(78, 115, 223, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(78, 115, 223, 1)',
+                        pointBorderColor: '#fff',
+                        lineTension: 0.3
+                    },
+                    {
+                        label: 'Số đơn hàng',
+                        data: [40, 35, 30, 45, 50, 55, 60, 70, 65, 75, 80, 85],
+                        backgroundColor: 'rgba(28, 200, 138, 0.05)',
+                        borderColor: 'rgba(28, 200, 138, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(28, 200, 138, 1)',
+                        pointBorderColor: '#fff',
+                        lineTension: 0.3
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'suppliers',
     'branches',
     'reports',
+    'staff',
 ]
 
 MIDDLEWARE = [
@@ -77,6 +78,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'FinalProduct.middleware.RoleBasedAccessMiddleware',  # Custom middleware for role-based access
 ]
 
 ROOT_URLCONF = 'FinalProduct.urls'

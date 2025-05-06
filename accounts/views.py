@@ -11,7 +11,8 @@ from orders.models import Order
 def login_view(request):
     """View xử lý đăng nhập"""
     if request.user.is_authenticated:
-        return redirect('home')
+        # Nếu đã đăng nhập, chuyển hướng theo vai trò
+        return redirect_by_role(request.user)
         
     if request.method == 'POST':
         form = CustomAuthenticationForm(request, data=request.POST)
@@ -21,13 +22,32 @@ def login_view(request):
             user = authenticate(request, username=email, password=password)
             if user is not None:
                 login(request, user)
-                next_url = request.GET.get('next', 'home')
+                # Chỉ sử dụng next_url nếu được chỉ định rõ ràng
+                next_url = request.GET.get('next')
+                if next_url:
+                    return redirect(next_url)
+                
                 messages.success(request, f'Xin chào, {user.get_full_name()}!')
-                return redirect(next_url)
+                # Chuyển hướng dựa trên vai trò của người dùng
+                return redirect_by_role(user)
     else:
         form = CustomAuthenticationForm()
     
     return render(request, 'accounts/login.html', {'form': form})
+
+def redirect_by_role(user):
+    """Chuyển hướng người dùng dựa trên vai trò"""
+    if user.is_branch_manager:
+        return redirect('staff:dashboard')
+    elif user.is_sales_staff:
+        return redirect('staff:dashboard')
+    elif user.is_inventory_manager:
+        return redirect('staff:dashboard')
+    elif user.is_business_owner:
+        return redirect('staff:dashboard')
+    else:
+        # Người dùng thông thường (khách hàng) đi đến trang chủ
+        return redirect('home')
 
 def logout_view(request):
     """View xử lý đăng xuất"""
@@ -38,7 +58,7 @@ def logout_view(request):
 def register_view(request):
     """View xử lý đăng ký tài khoản"""
     if request.user.is_authenticated:
-        return redirect('home')
+        return redirect_by_role(request.user)
         
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -53,7 +73,7 @@ def register_view(request):
                 login(request, authenticated_user)
                 
                 messages.success(request, 'Đăng ký tài khoản thành công!')
-                return redirect('home')
+                return redirect_by_role(user)
     else:
         form = CustomUserCreationForm()
     

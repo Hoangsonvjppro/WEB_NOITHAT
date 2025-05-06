@@ -1,0 +1,119 @@
+<!-- Common menu items for all staff -->
+<div class="user-info text-center py-3 border-bottom">
+    <div class="user-avatar mb-2">
+        <i class="fas fa-user-circle fa-3x"></i>
+    </div>
+    <h6 class="mb-0">{{ request.user.get_full_name }}</h6>
+    <small class="text-muted">{{ request.user.get_role_display }}</small>
+</div>
+
+<ul class="nav flex-column">
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'staff:dashboard' %}">
+            <i class="fas fa-tachometer-alt me-2"></i>
+            Tổng quan
+        </a>
+    </li>
+    
+    <li class="nav-item">
+        <a class="nav-link {% if 'orders' in request.path %}active{% endif %}" href="{% url 'staff:orders' %}">
+            <i class="fas fa-shopping-cart me-2"></i>
+            Đơn hàng
+        </a>
+    </li>
+    
+    <li class="nav-item">
+        <a class="nav-link {% if 'products' in request.path %}active{% endif %}" href="{% url 'staff:products' %}">
+            <i class="fas fa-box me-2"></i>
+            Sản phẩm
+        </a>
+    </li>
+    
+    {% if request.user.is_inventory_manager or request.user.is_branch_manager or request.user.is_business_owner %}
+    <!-- Inventory Manager, Branch Manager, and Business Owner specific menu items -->
+    <div class="sidebar-heading mt-3">
+        Quản lý kho
+    </div>
+    
+    <li class="nav-item">
+        <a class="nav-link {% if 'inventory' in request.path %}active{% endif %}" href="{% url 'staff:inventory' %}">
+            <i class="fas fa-warehouse me-2"></i>
+            Tồn kho
+        </a>
+    </li>
+    
+    <li class="nav-item">
+        <a class="nav-link {% if 'stock_movements' in request.path %}active{% endif %}" href="{% url 'staff:stock_movements' %}">
+            <i class="fas fa-dolly me-2"></i>
+            Xuất nhập kho
+        </a>
+    </li>
+    
+    <li class="nav-item">
+        <a class="nav-link {% if 'suppliers' in request.path %}active{% endif %}" href="{% url 'staff:suppliers' %}">
+            <i class="fas fa-truck me-2"></i>
+            Nhà cung cấp
+        </a>
+    </li>
+    {% endif %}
+    
+    {% if request.user.is_branch_manager or request.user.is_business_owner %}
+    <!-- Branch Manager and Business Owner specific menu items -->
+    <div class="sidebar-heading mt-3">
+        Quản lý cửa hàng
+    </div>
+    
+    <li class="nav-item">
+        <a class="nav-link {% if 'staff_members' in request.path %}active{% endif %}" href="{% url 'staff:staff_members' %}">
+            <i class="fas fa-users me-2"></i>
+            Nhân viên
+        </a>
+    </li>
+    
+    <li class="nav-item">
+        <a class="nav-link {% if 'reports' in request.path %}active{% endif %}" href="{% url 'staff:reports' %}">
+            <i class="fas fa-chart-bar me-2"></i>
+            Báo cáo
+        </a>
+    </li>
+    {% endif %}
+    
+    {% if request.user.is_business_owner %}
+    <!-- Business Owner specific menu items -->
+    <div class="sidebar-heading mt-3">
+        Quản lý doanh nghiệp
+    </div>
+    
+    <li class="nav-item">
+        <a class="nav-link {% if 'branches' in request.path %}active{% endif %}" href="{% url 'staff:branches' %}">
+            <i class="fas fa-store me-2"></i>
+            Chi nhánh
+        </a>
+    </li>
+    
+    <li class="nav-item">
+        <a class="nav-link {% if 'settings' in request.path %}active{% endif %}" href="{% url 'staff:settings' %}">
+            <i class="fas fa-cog me-2"></i>
+            Cài đặt
+        </a>
+    </li>
+    {% endif %}
+    
+    <div class="sidebar-heading mt-3">
+        Tài khoản
+    </div>
+    
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'accounts:profile' %}">
+            <i class="fas fa-user me-2"></i>
+            Hồ sơ cá nhân
+        </a>
+    </li>
+    
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'accounts:logout' %}">
+            <i class="fas fa-sign-out-alt me-2"></i>
+            Đăng xuất
+        </a>
+    </li>
+</ul> 

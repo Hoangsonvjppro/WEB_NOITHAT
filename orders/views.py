@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from django.http import HttpResponse
+from django.db import transaction
 # from django.template.loader import render_to_string
 # from xhtml2pdf import pisa
 from django.conf import settings
@@ -14,6 +15,7 @@ from cart.models import Cart
 from branches.models import Branch
 from accounts.models import User
 from products.models import Product
+from inventory.models import InventoryRecord, StockMovement, Warehouse
 
 from .forms import CheckoutForm, PaymentForm
 
@@ -31,6 +33,19 @@ def checkout(request):
         messages.warning(request, 'Giỏ hàng của bạn đang trống. Vui lòng thêm sản phẩm vào giỏ hàng trước.')
         return redirect('cart:cart_detail')
     
+    # Check if all items are in stock
+    out_of_stock_items = []
+    for cart_item in cart.items.all():
+        if cart_item.quantity > cart_item.product.quantity:
+            out_of_stock_items.append(cart_item.product.name)
+    
+    if out_of_stock_items:
+        messages.error(
+            request, 
+            f'Rất tiếc, những sản phẩm sau đã hết hàng hoặc không đủ số lượng: {", ".join(out_of_stock_items)}'
+        )
+        return redirect('cart:cart_detail')
+    
     # Initialize form with user data if available
     initial_data = {}
     if hasattr(request.user, 'customer_profile'):
@@ -45,49 +60,81 @@ def checkout(request):
     if request.method == 'POST':
         form = CheckoutForm(request.POST)
         if form.is_valid():
-            # Get the nearest branch (in a real app, you would determine this based on location)
-            branch = Branch.objects.filter(is_active=True).first()
-            
-            # Create the order
-            order = Order(
-                user=request.user,
-                branch=branch,
-                shipping_name=form.cleaned_data['shipping_name'],
-                shipping_email=form.cleaned_data['shipping_email'],
-                shipping_phone=form.cleaned_data['shipping_phone'],
-                shipping_address=form.cleaned_data['shipping_address'],
-                notes=form.cleaned_data['notes'],
-                payment_method=form.cleaned_data['payment_method'],
-                shipping_fee=form.cleaned_data.get('shipping_fee', 0),
-                total_amount=cart.total_price + form.cleaned_data.get('shipping_fee', 0),
-            )
-            order.save()
-            
-            # Create order items from cart items
-            for cart_item in cart.items.all():
-                OrderItem.objects.create(
-                    order=order,
-                    product=cart_item.product,
-                    product_name=cart_item.product.name,
-                    quantity=cart_item.quantity,
-                    price=cart_item.product.current_price,
-                    total_price=cart_item.total_price
-                )
-            
-            # Clear the cart after creating the order
-            cart.clear()
-            
-            # Store order ID in session
-            request.session['order_id'] = order.id
-            
-            # Redirect to payment if not COD
-            if order.payment_method == Order.PAYMENT_METHOD_COD:
-                order.payment_status = Order.PAYMENT_PENDING
-                order.save()
-                messages.success(request, 'Đơn hàng của bạn đã được đặt thành công. Cảm ơn bạn đã mua hàng!')
-                return redirect('orders:order_complete')
-            else:
-                return redirect('orders:payment')
+            try:
+                with transaction.atomic():
+                    # Get the nearest branch (in a real app, you would determine this based on location)
+                    branch = Branch.objects.filter(is_active=True).first()
+                    if not branch:
+                        messages.error(request, 'Không tìm thấy chi nhánh hoạt động. Vui lòng liên hệ quản trị viên.')
+                        return redirect('cart:cart_detail')
+                    
+                    # Create the order
+                    order = Order(
+                        user=request.user,
+                        branch=branch,
+                        shipping_name=form.cleaned_data['shipping_name'],
+                        shipping_email=form.cleaned_data['shipping_email'],
+                        shipping_phone=form.cleaned_data['shipping_phone'],
+                        shipping_address=form.cleaned_data['shipping_address'],
+                        notes=form.cleaned_data['notes'],
+                        payment_method=form.cleaned_data['payment_method'],
+                        shipping_fee=form.cleaned_data.get('shipping_fee', 0),
+                        total_amount=cart.total_price + form.cleaned_data.get('shipping_fee', 0),
+                    )
+                    order.save()
+                    
+                    # Get or create warehouse for the branch
+                    warehouse, _ = Warehouse.objects.get_or_create(
+                        branch=branch,
+                        defaults={
+                            'name': f'Kho {branch.name}',
+                            'address': branch.address
+                        }
+                    )
+                    
+                    # Create order items from cart items and update inventory
+                    for cart_item in cart.items.all():
+                        # Check stock again (double check inside transaction)
+                        if cart_item.quantity > cart_item.product.quantity:
+                            raise Exception(f'Sản phẩm {cart_item.product.name} không đủ số lượng.')
+                            
+                        # Create order item
+                        OrderItem.objects.create(
+                            order=order,
+                            product=cart_item.product,
+                            product_name=cart_item.product.name,
+                            quantity=cart_item.quantity,
+                            price=cart_item.product.current_price,
+                            total_price=cart_item.total_price
+                        )
+                        
+                        # Create a stock movement to reduce inventory
+                        StockMovement.objects.create(
+                            warehouse=warehouse,
+                            product=cart_item.product,
+                            quantity=cart_item.quantity,
+                            movement_type=StockMovement.MOVEMENT_OUT,
+                            performed_by=request.user,
+                            notes=f'Đơn hàng #{order.id}'
+                        )
+                    
+                    # Clear the cart after creating the order
+                    cart.clear()
+                    
+                    # Store order ID in session
+                    request.session['order_id'] = order.id
+                    
+                    # Redirect to payment if not COD
+                    if order.payment_method == Order.PAYMENT_METHOD_COD:
+                        order.payment_status = Order.PAYMENT_PENDING
+                        order.save()
+                        messages.success(request, 'Đơn hàng của bạn đã được đặt thành công. Cảm ơn bạn đã mua hàng!')
+                        return redirect('orders:order_complete')
+                    else:
+                        return redirect('orders:payment')
+            except Exception as e:
+                messages.error(request, f'Có lỗi xảy ra: {str(e)}')
+                return redirect('cart:cart_detail')
     else:
         form = CheckoutForm(initial=initial_data)
     
@@ -107,37 +154,50 @@ def payment(request):
         messages.error(request, 'Không tìm thấy đơn hàng. Vui lòng thử lại.')
         return redirect('cart:cart_detail')
     
-    order = get_object_or_404(Order, id=order_id, user=request.user)
-    
-    if request.method == 'POST':
-        form = PaymentForm(request.POST)
-        if form.is_valid():
-            # Process payment (in a real app, you would integrate with payment gateway)
-            payment = Payment(
-                order=order,
-                amount=order.total_amount,
-                payment_method=order.payment_method,
-                transaction_id=form.cleaned_data.get('transaction_id', ''),
-                is_successful=True,  # In real app, this would be set by payment gateway callback
-                notes=form.cleaned_data.get('notes', '')
-            )
-            payment.save()
-            
-            # Update order status
-            order.payment_status = Order.PAYMENT_PAID
-            order.status = Order.STATUS_PROCESSING
-            order.save()
-            
-            messages.success(request, 'Thanh toán thành công! Đơn hàng của bạn đang được xử lý.')
+    try:
+        order = get_object_or_404(Order, id=order_id, user=request.user)
+        
+        # Check if order is already paid
+        if order.payment_status == Order.PAYMENT_PAID:
+            messages.info(request, 'Đơn hàng này đã được thanh toán.')
             return redirect('orders:order_complete')
-    else:
-        form = PaymentForm()
-    
-    context = {
-        'form': form,
-        'order': order,
-    }
-    return render(request, 'orders/payment.html', context)
+        
+        if request.method == 'POST':
+            form = PaymentForm(request.POST)
+            if form.is_valid():
+                try:
+                    with transaction.atomic():
+                        # Process payment (in a real app, you would integrate with payment gateway)
+                        payment = Payment(
+                            order=order,
+                            amount=order.total_amount,
+                            payment_method=order.payment_method,
+                            transaction_id=form.cleaned_data.get('transaction_id', ''),
+                            is_successful=True,  # In real app, this would be set by payment gateway callback
+                            notes=form.cleaned_data.get('notes', '')
+                        )
+                        payment.save()
+                        
+                        # Update order status
+                        order.payment_status = Order.PAYMENT_PAID
+                        order.status = Order.STATUS_PROCESSING
+                        order.save()
+                        
+                        messages.success(request, 'Thanh toán thành công! Đơn hàng của bạn đang được xử lý.')
+                        return redirect('orders:order_complete')
+                except Exception as e:
+                    messages.error(request, f'Lỗi khi xử lý thanh toán: {str(e)}')
+        else:
+            form = PaymentForm()
+        
+        context = {
+            'form': form,
+            'order': order,
+        }
+        return render(request, 'orders/payment.html', context)
+    except Exception as e:
+        messages.error(request, f'Có lỗi xảy ra: {str(e)}')
+        return redirect('cart:cart_detail')
 
 
 @login_required

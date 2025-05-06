@@ -19,10 +19,21 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
+from django.shortcuts import redirect
+
+def home_view(request):
+    """
+    Home view that redirects staff users to their dashboard
+    and displays the homepage for customers and unauthenticated users
+    """
+    if request.user.is_authenticated and request.user.role != 'customer':
+        return redirect('staff:dashboard')
+    # Use TemplateView to display home.html for customers and unauthenticated users
+    return TemplateView.as_view(template_name='home.html')(request)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', TemplateView.as_view(template_name='home.html'), name='home'),
+    path('', home_view, name='home'),
     path('accounts/', include('accounts.urls')),
     path('products/', include('products.urls')),
     path('cart/', include('cart.urls')),
@@ -31,6 +42,7 @@ urlpatterns = [
     path('suppliers/', include('suppliers.urls')),
     path('branches/', include('branches.urls')),
     path('reports/', include('reports.urls')),
+    path('staff/', include('staff.urls')),
     path('__debug__/', include('debug_toolbar.urls')),
 ]
 

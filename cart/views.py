@@ -12,11 +12,11 @@ def _get_or_create_cart(request):
     if request.user.is_authenticated:
         cart, created = Cart.objects.get_or_create(user=request.user)
     else:
-        session_id = request.session.session_key
-        if not session_id:
+        # Ensure session exists before trying to access session_key
+        if not request.session.exists(request.session.session_key):
             request.session.create()
-            session_id = request.session.session_key
-        
+            
+        session_id = request.session.session_key
         cart, created = Cart.objects.get_or_create(session_id=session_id)
     
     return cart
@@ -141,10 +141,10 @@ def clear_cart(request):
 
 def merge_carts(request):
     """Merge anonymous cart with user cart on login"""
-    if 'anonymous_cart_id' in request.session and request.user.is_authenticated:
+    if request.user.is_authenticated and request.session.get('session_key'):
         try:
             # Get the anonymous cart
-            anonymous_cart = Cart.objects.get(session_id=request.session['anonymous_cart_id'])
+            anonymous_cart = Cart.objects.get(session_id=request.session.get('session_key'))
             
             # Get or create user cart
             user_cart, created = Cart.objects.get_or_create(user=request.user)
@@ -163,7 +163,6 @@ def merge_carts(request):
             
             # Delete anonymous cart
             anonymous_cart.delete()
-            del request.session['anonymous_cart_id']
             messages.success(request, 'Giỏ hàng của bạn đã được giữ lại từ phiên trước đó!')
             
         except Cart.DoesNotExist:

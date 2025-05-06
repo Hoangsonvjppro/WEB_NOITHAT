@@ -4,6 +4,7 @@ from products.models import Product
 from branches.models import Branch
 from suppliers.models import Supplier
 from accounts.models import User
+from django.db import transaction
 
 
 class Warehouse(models.Model):
@@ -99,6 +100,7 @@ class StockMovement(models.Model):
         return f"{self.get_movement_type_display()} - {self.product.name} - {self.quantity} - {self.created_at.strftime('%d/%m/%Y')}"
     
     def save(self, *args, **kwargs):
+        # Generate reference number if not provided
         if not self.reference_number:
             prefix = {
                 self.MOVEMENT_IN: 'IN',
@@ -113,28 +115,53 @@ class StockMovement(models.Model):
             last_id = last_movement.id if last_movement else 0
             self.reference_number = f"{prefix}{last_id + 1:08d}"
         
-        # Update inventory record quantities
-        inventory_record, created = InventoryRecord.objects.get_or_create(
-            warehouse=self.warehouse,
-            product=self.product,
-            defaults={'quantity': 0}
-        )
-        
-        # Handle different movement types
-        if self.movement_type == self.MOVEMENT_IN or self.movement_type == self.MOVEMENT_RETURN:
-            inventory_record.quantity += self.quantity
-        elif self.movement_type == self.MOVEMENT_OUT:
-            inventory_record.quantity = max(0, inventory_record.quantity - self.quantity)
-        elif self.movement_type == self.MOVEMENT_TRANSFER and self.destination_warehouse:
-            inventory_record.quantity = max(0, inventory_record.quantity - self.quantity)
-            dest_record, dest_created = InventoryRecord.objects.get_or_create(
-                warehouse=self.destination_warehouse,
+        with transaction.atomic():
+            # Update inventory record quantities
+            inventory_record, created = InventoryRecord.objects.get_or_create(
+                warehouse=self.warehouse,
                 product=self.product,
                 defaults={'quantity': 0}
             )
-            dest_record.quantity += self.quantity
-            dest_record.save()
-        
-        inventory_record.save()
-        
-        super().save(*args, **kwargs)
+            
+            # Handle different movement types
+            if self.movement_type == self.MOVEMENT_IN or self.movement_type == self.MOVEMENT_RETURN:
+                inventory_record.quantity += self.quantity
+                # Update the product's overall quantity
+                self.product.quantity += self.quantity
+                self.product.save(update_fields=['quantity'])
+            elif self.movement_type == self.MOVEMENT_OUT:
+                if inventory_record.quantity >= self.quantity:
+                    inventory_record.quantity -= self.quantity
+                    # Update the product's overall quantity
+                    self.product.quantity = max(0, self.product.quantity - self.quantity)
+                    self.product.save(update_fields=['quantity'])
+                else:
+                    # Handle insufficient stock
+                    inventory_record.quantity = 0
+                    self.product.quantity = max(0, self.product.quantity - self.quantity)
+                    self.product.save(update_fields=['quantity'])
+            elif self.movement_type == self.MOVEMENT_TRANSFER and self.destination_warehouse:
+                if inventory_record.quantity >= self.quantity:
+                    inventory_record.quantity -= self.quantity
+                else:
+                    inventory_record.quantity = 0
+                
+                dest_record, dest_created = InventoryRecord.objects.get_or_create(
+                    warehouse=self.destination_warehouse,
+                    product=self.product,
+                    defaults={'quantity': 0}
+                )
+                dest_record.quantity += self.quantity
+                dest_record.save()
+            elif self.movement_type == self.MOVEMENT_ADJUSTMENT:
+                # For adjustments, directly set the inventory quantity
+                old_quantity = inventory_record.quantity
+                inventory_record.quantity = self.quantity
+                # Update the product's overall quantity
+                quantity_diff = self.quantity - old_quantity
+                self.product.quantity += quantity_diff
+                self.product.save(update_fields=['quantity'])
+            
+            inventory_record.save()
+            
+            super().save(*args, **kwargs)

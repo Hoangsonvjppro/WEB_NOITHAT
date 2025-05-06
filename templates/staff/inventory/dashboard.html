@@ -1,0 +1,315 @@
+{% extends 'base/staff_base.html' %}
+
+{% block title %}Quản Lý Kho{% endblock %}
+
+{% block sidebar %}
+    {% include 'staff/dashboard/sidebar.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 text-gray-800">Quản Lý Kho</h1>
+        <div>
+            <a href="{% url 'staff:stock_in' %}" class="btn btn-success me-2">
+                <i class="fas fa-plus me-1"></i> Nhập kho
+            </a>
+            <a href="{% url 'staff:stock_out' %}" class="btn btn-warning me-2">
+                <i class="fas fa-minus me-1"></i> Xuất kho
+            </a>
+            <a href="{% url 'staff:inventory_report' %}" class="btn btn-primary">
+                <i class="fas fa-file-alt me-1"></i> Báo cáo kho
+            </a>
+        </div>
+    </div>
+    
+    <!-- Inventory Statistics -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng sản phẩm trong kho</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_products }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-boxes fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Nhập kho hôm nay</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ today_stock_in }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-arrow-circle-down fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Sản phẩm sắp hết hàng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ low_stock_count }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Xuất kho hôm nay</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ today_stock_out }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-arrow-circle-up fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Products with low stock -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Sản phẩm sắp hết hàng</h6>
+            <a href="{% url 'staff:low_stock' %}" class="btn btn-sm btn-primary">
+                Xem tất cả
+            </a>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã SKU</th>
+                            <th>Sản phẩm</th>
+                            <th>Danh mục</th>
+                            <th>Hiện có</th>
+                            <th>Mức tồn tối thiểu</th>
+                            <th>Nhà cung cấp</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in low_stock_products %}
+                        <tr class="{% if product.quantity == 0 %}table-danger{% else %}table-warning{% endif %}">
+                            <td>{{ product.sku }}</td>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.category.name }}</td>
+                            <td>{{ product.quantity }}</td>
+                            <td>{{ product.inventory_records.first.min_stock_level }}</td>
+                            <td>{{ product.supplier.name|default:"Không có" }}</td>
+                            <td>
+                                <a href="{% url 'staff:stock_in_product' product.id %}" class="btn btn-sm btn-success">
+                                    <i class="fas fa-plus"></i>
+                                </a>
+                                <a href="{% url 'staff:product_detail' product.id %}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">Không có sản phẩm nào sắp hết hàng</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Stock Movements -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Hoạt động gần đây</h6>
+                    <a href="{% url 'staff:stock_movements' %}" class="btn btn-sm btn-primary">
+                        Xem tất cả
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Mã tham chiếu</th>
+                                    <th>Sản phẩm</th>
+                                    <th>Loại</th>
+                                    <th>Số lượng</th>
+                                    <th>Người thực hiện</th>
+                                    <th>Thời gian</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for movement in recent_movements %}
+                                <tr>
+                                    <td>{{ movement.reference_number }}</td>
+                                    <td>{{ movement.product.name }}</td>
+                                    <td>
+                                        {% if movement.movement_type == 'in' %}
+                                            <span class="badge bg-success">Nhập kho</span>
+                                        {% elif movement.movement_type == 'out' %}
+                                            <span class="badge bg-warning">Xuất kho</span>
+                                        {% elif movement.movement_type == 'transfer' %}
+                                            <span class="badge bg-info">Chuyển kho</span>
+                                        {% elif movement.movement_type == 'adjustment' %}
+                                            <span class="badge bg-primary">Điều chỉnh</span>
+                                        {% elif movement.movement_type == 'return' %}
+                                            <span class="badge bg-danger">Trả hàng</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ movement.quantity }}</td>
+                                    <td>{{ movement.performed_by.get_full_name }}</td>
+                                    <td>{{ movement.created_at|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">Không có hoạt động gần đây</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Inventory by Category -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Phân bố theo danh mục</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie mb-4">
+                        <canvas id="categoryPieChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        {% for category in categories %}
+                        <span class="me-2">
+                            <i class="fas fa-circle" style="color: {{ category.color }}"></i> {{ category.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pending Shipments -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Đơn hàng đang chờ xuất kho</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Mã đơn hàng</th>
+                            <th>Khách hàng</th>
+                            <th>Ngày đặt</th>
+                            <th>Trạng thái</th>
+                            <th>Số lượng sản phẩm</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in pending_orders %}
+                        <tr>
+                            <td>{{ order.order_number }}</td>
+                            <td>{{ order.shipping_name }}</td>
+                            <td>{{ order.created_at|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if order.status == 'processing' %}
+                                    <span class="badge bg-info">Đang xử lý</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ order.total_items }}</td>
+                            <td>
+                                <a href="{% url 'staff:order_detail' order.id %}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'staff:process_shipment' order.id %}" class="btn btn-sm btn-success">
+                                    <i class="fas fa-shipping-fast"></i> Xử lý
+                                </a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">Không có đơn hàng nào đang chờ xuất kho</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Inventory by Category Chart
+    document.addEventListener('DOMContentLoaded', function() {
+        var ctx = document.getElementById('categoryPieChart').getContext('2d');
+        var myPieChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Bàn', 'Ghế', 'Giường', 'Tủ', 'Kệ', 'Khác'],
+                datasets: [{
+                    data: [30, 22, 18, 15, 10, 5],
+                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796'],
+                    hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf', '#dda20a', '#be2617', '#666666'],
+                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                }],
+            },
+            options: {
+                maintainAspectRatio: false,
+                tooltips: {
+                    backgroundColor: "rgb(255,255,255)",
+                    bodyFontColor: "#858796",
+                    borderColor: '#dddfeb',
+                    borderWidth: 1,
+                    xPadding: 15,
+                    yPadding: 15,
+                    displayColors: false,
+                    caretPadding: 10,
+                },
+                legend: {
+                    display: false
+                },
+                cutoutPercentage: 70,
+            },
+        });
+    });
+</script>
+{% endblock %} 
