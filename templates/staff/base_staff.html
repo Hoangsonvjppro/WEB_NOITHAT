@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Quản Lý Nội Thất{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/static/img/favicon.ico">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Dashboard CSS -->
+    <style>
+        body {
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .sidebar {
+            min-height: calc(100vh - 60px);
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            background-color: #f8f9fa;
+        }
+        .sidebar .nav-link {
+            color: #333;
+            border-radius: 0;
+            padding: 10px 20px;
+        }
+        .sidebar .nav-link:hover {
+            background-color: #e9ecef;
+        }
+        .sidebar .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .sidebar-heading {
+            padding: 10px 15px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            color: #6c757d;
+            font-weight: bold;
+        }
+        main {
+            padding: 20px;
+        }
+        .navbar-staff {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background-color: #fff;
+        }
+        .dashboard-card {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .dashboard-card:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+        }
+        .page-header {
+            background-color: #fff;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+    </style>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Staff Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light navbar-staff">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'staff:dashboard' %}">
+                <i class="fas fa-chair me-2"></i>
+                Quản Lý Nội Thất
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            {% if request.user.is_authenticated %}
+                                {{ request.user.get_full_name|default:request.user.email }}
+                            {% else %}
+                                Tài khoản
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            {% if request.user.is_authenticated %}
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile' %}"><i class="fas fa-user me-2"></i>Thông tin cá nhân</a></li>
+                                <li><a class="dropdown-item" href="{% url 'staff:settings' %}"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                            {% else %}
+                                <li><a class="dropdown-item" href="{% url 'accounts:login' %}"><i class="fas fa-sign-in-alt me-2"></i>Đăng nhập</a></li>
+                                <li><a class="dropdown-item" href="{% url 'accounts:register' %}"><i class="fas fa-user-plus me-2"></i>Đăng ký</a></li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-2 col-md-3 p-0">
+                <div class="sidebar py-3">
+                    <div class="d-flex flex-column">
+                        <!-- Dashboard Link for everyone -->
+                        <a href="{% url 'staff:dashboard' %}" class="nav-link {% if request.path == '/staff/dashboard/' %}active{% endif %}">
+                            <i class="fas fa-tachometer-alt me-2"></i> Tổng quan
+                        </a>
+                        
+                        <!-- Orders Section -->
+                        <div class="sidebar-heading mt-3">Đơn Hàng</div>
+                        <a href="{% url 'staff:orders' %}" class="nav-link {% if '/staff/orders/' in request.path %}active{% endif %}">
+                            <i class="fas fa-shopping-cart me-2"></i> Đơn hàng
+                        </a>
+                        {% if perms.orders.add_order %}
+                        <a href="{% url 'staff:new_order' %}" class="nav-link {% if '/staff/orders/new/' in request.path %}active{% endif %}">
+                            <i class="fas fa-plus-circle me-2"></i> Tạo đơn hàng
+                        </a>
+                        {% endif %}
+                        
+                        <!-- Products & Inventory Section -->
+                        <div class="sidebar-heading mt-3">Sản Phẩm & Kho</div>
+                        <a href="{% url 'staff:products' %}" class="nav-link {% if '/staff/products/' in request.path and not '/categories/' in request.path %}active{% endif %}">
+                            <i class="fas fa-couch me-2"></i> Sản phẩm
+                        </a>
+                        {% if perms.products.view_category %}
+                        <a href="{% url 'staff:categories' %}" class="nav-link {% if '/staff/products/categories/' in request.path %}active{% endif %}">
+                            <i class="fas fa-tags me-2"></i> Danh mục
+                        </a>
+                        {% endif %}
+                        {% if perms.inventory.view_stockmovement %}
+                        <a href="{% url 'staff:inventory' %}" class="nav-link {% if '/staff/inventory/' in request.path %}active{% endif %}">
+                            <i class="fas fa-warehouse me-2"></i> Kho hàng
+                        </a>
+                        {% endif %}
+                        
+                        <!-- Branch Management Section -->
+                        {% if user.is_staff %}
+                        <div class="sidebar-heading mt-3">Chi Nhánh</div>
+                        <a href="{% url 'staff:branches' %}" class="nav-link {% if '/staff/branches/' in request.path %}active{% endif %}">
+                            <i class="fas fa-store me-2"></i> Chi nhánh
+                        </a>
+                        {% endif %}
+                        
+                        <!-- Suppliers Section -->
+                        {% if perms.suppliers.view_supplier %}
+                        <div class="sidebar-heading mt-3">Nhà Cung Cấp</div>
+                        <a href="{% url 'staff:suppliers' %}" class="nav-link {% if '/staff/suppliers/' in request.path %}active{% endif %}">
+                            <i class="fas fa-truck me-2"></i> Nhà cung cấp
+                        </a>
+                        {% endif %}
+                        
+                        <!-- Reports Section -->
+                        {% if perms.reports.view_report %}
+                        <div class="sidebar-heading mt-3">Báo Cáo</div>
+                        <a href="{% url 'staff:sales_report' %}" class="nav-link {% if '/staff/reports/sales/' in request.path %}active{% endif %}">
+                            <i class="fas fa-chart-line me-2"></i> Báo cáo doanh thu
+                        </a>
+                        <a href="{% url 'staff:inventory_report' %}" class="nav-link {% if '/staff/reports/inventory/' in request.path %}active{% endif %}">
+                            <i class="fas fa-chart-bar me-2"></i> Báo cáo kho hàng
+                        </a>
+                        {% endif %}
+                        
+                        <!-- Admin Section -->
+                        {% if user.is_staff %}
+                        <div class="sidebar-heading mt-3">Quản Trị</div>
+                        <a href="{% url 'staff:staff_list' %}" class="nav-link {% if '/staff/staff/' in request.path %}active{% endif %}">
+                            <i class="fas fa-users me-2"></i> Nhân viên
+                        </a>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                        <a href="{% url 'admin:index' %}" class="nav-link" target="_blank">
+                            <i class="fas fa-cogs me-2"></i> Quản trị hệ thống
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-lg-10 col-md-9">
+                <main>
+                    {% if messages %}
+                        <div class="messages mb-4">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="page-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">{% block page_title %}Dashboard{% endblock %}</h4>
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb mb-0">
+                                    <li class="breadcrumb-item"><a href="{% url 'staff:dashboard' %}">Dashboard</a></li>
+                                    {% block breadcrumbs %}{% endblock %}
+                                </ol>
+                            </nav>
+                        </div>
+                        {% block page_actions %}{% endblock %}
+                    </div>
+                    
+                    {% block content %}
+                    {% endblock %}
+                </main>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="/static/js/main.js"></script>
+    
+    <!-- Chart.js for dashboards -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html> 
